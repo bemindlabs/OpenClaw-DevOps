@@ -1,55 +1,111 @@
 @import "tailwindcss";
 
 /* OpenClaw DevOps Design System - Green & Black Theme */
-@layer base {
-  :root {
-    /* Dark theme as default */
-    --background: 220 13% 3%;           /* #09090b */
-    --foreground: 0 0% 98%;              /* #fafafa */
+@theme {
+  /* Primary Green Palette */
+  --color-primary-50: #f0fdf4;
+  --color-primary-100: #dcfce7;
+  --color-primary-200: #bbf7d0;
+  --color-primary-300: #86efac;
+  --color-primary-400: #4ade80;
+  --color-primary-500: #22c55e;
+  --color-primary-600: #16a34a;
+  --color-primary-700: #15803d;
+  --color-primary-800: #166534;
+  --color-primary-900: #14532d;
+  --color-primary-950: #052e16;
 
-    --card: 220 13% 9%;                  /* #18181b */
-    --card-foreground: 0 0% 98%;         /* #fafafa */
+  /* Accent Emerald */
+  --color-accent-50: #ecfdf5;
+  --color-accent-100: #d1fae5;
+  --color-accent-200: #a7f3d0;
+  --color-accent-300: #6ee7b7;
+  --color-accent-400: #34d399;
+  --color-accent-500: #10b981;
+  --color-accent-600: #059669;
+  --color-accent-700: #047857;
+  --color-accent-800: #065f46;
+  --color-accent-900: #064e3b;
 
-    --popover: 220 13% 9%;               /* #18181b */
-    --popover-foreground: 0 0% 98%;      /* #fafafa */
+  /* Neutral Grays (Dark Theme) */
+  --color-neutral-50: #fafafa;
+  --color-neutral-100: #f4f4f5;
+  --color-neutral-200: #e4e4e7;
+  --color-neutral-300: #d4d4d8;
+  --color-neutral-400: #a1a1aa;
+  --color-neutral-500: #71717a;
+  --color-neutral-600: #52525b;
+  --color-neutral-700: #3f3f46;
+  --color-neutral-800: #27272a;
+  --color-neutral-900: #18181b;
+  --color-neutral-950: #09090b;
 
-    --primary: 142 76% 36%;              /* #16a34a (green-600) */
-    --primary-foreground: 220 13% 3%;    /* #09090b */
+  /* Background Hierarchy */
+  --color-background: #09090b;
+  --color-background-secondary: #18181b;
+  --color-background-tertiary: #27272a;
+  --color-background-elevated: #3f3f46;
 
-    --secondary: 240 6% 15%;             /* #27272a */
-    --secondary-foreground: 0 0% 98%;    /* #fafafa */
+  /* Text Colors */
+  --color-foreground: #fafafa;
+  --color-foreground-secondary: #d4d4d8;
+  --color-foreground-tertiary: #a1a1aa;
+  --color-foreground-accent: #22c55e;
 
-    --muted: 240 6% 15%;                 /* #27272a */
-    --muted-foreground: 240 5% 64%;      /* #a1a1aa */
+  /* Component Colors */
+  --color-primary: #22c55e;
+  --color-primary-foreground: #09090b;
 
-    --accent: 160 84% 39%;               /* #10b981 (emerald-500) */
-    --accent-foreground: 220 13% 3%;     /* #09090b */
+  --color-secondary: #27272a;
+  --color-secondary-foreground: #fafafa;
 
-    --destructive: 0 84% 60%;            /* #ef4444 */
-    --destructive-foreground: 0 0% 98%;  /* #fafafa */
+  --color-muted: #27272a;
+  --color-muted-foreground: #a1a1aa;
 
-    --border: 240 6% 25%;                /* #3f3f46 */
-    --input: 240 6% 15%;                 /* #27272a */
-    --ring: 142 76% 36%;                 /* #16a34a */
+  --color-accent: #10b981;
+  --color-accent-foreground: #09090b;
 
-    --radius: 0.5rem;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #fafafa;
 
-    /* Custom semantic colors */
-    --success: 142 71% 45%;              /* #22c55e */
-    --error: 0 84% 60%;                  /* #ef4444 */
-    --warning: 38 92% 50%;               /* #f59e0b */
-    --info: 217 91% 60%;                 /* #3b82f6 */
-  }
+  --color-card: #18181b;
+  --color-card-foreground: #fafafa;
+
+  --color-popover: #18181b;
+  --color-popover-foreground: #fafafa;
+
+  --color-border: #3f3f46;
+  --color-input: #27272a;
+  --color-ring: #22c55e;
+
+  /* Semantic Colors */
+  --color-success: #22c55e;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+
+  /* Border Radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+
+  /* Shadows with Glow */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
+  --shadow-glow-sm: 0 0 10px rgba(34, 197, 94, 0.3);
+  --shadow-glow-md: 0 0 20px rgba(34, 197, 94, 0.4);
+  --shadow-glow-lg: 0 0 30px rgba(34, 197, 94, 0.5);
 }
 
 @layer base {
   * {
-    border-color: hsl(var(--border));
+    @apply border-border;
   }
 
   body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+    @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
@@ -60,20 +116,20 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: hsl(var(--background));
+    background: var(--color-background-secondary);
   }
 
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--border));
+    background: var(--color-neutral-700);
     border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted));
+    background: var(--color-neutral-600);
   }
 }
 
-/* Status indicator colors using specific values */
+/* Status indicator colors using design system */
 @layer components {
   .status-healthy {
     background-color: #052e16;
@@ -98,6 +154,35 @@
     color: #a1a1aa;
     border-color: #3f3f46;
   }
+}
+
+/* Custom animations */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(34, 197, 94, 0.6);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
 }
 
 /* Custom utility classes */
