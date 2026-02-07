@@ -78,6 +78,9 @@ dev: ## Start all apps in development mode (with hot reload)
 	@echo "$(BLUE)║  Starting Development Servers              ║$(NC)"
 	@echo "$(BLUE)╚════════════════════════════════════════════╝$(NC)"
 	@echo ""
+	@echo "$(YELLOW)Cleaning development artifacts...$(NC)"
+	@./scripts/dev-clean.sh
+	@echo ""
 	@echo "$(GREEN)Starting all apps in development mode...$(NC)"
 	@echo ""
 	@echo "$(YELLOW)Services:$(NC)"
