@@ -1,0 +1,32 @@
+version: '3.8'
+
+# GCE-specific Docker Compose overrides
+# This file extends the main docker-compose.yml for GCE deployment
+
+services:
+  nginx:
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      environment: "production"
+      deployment: "gce"
+
+  landing:
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      environment: "production"
+      deployment: "gce"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+      # Add GCE-specific environment variables here

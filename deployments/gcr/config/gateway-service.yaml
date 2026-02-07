@@ -1,0 +1,63 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: openclaw-gateway
+  labels:
+    app: openclaw
+    component: gateway
+    environment: production
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "20"
+        run.googleapis.com/cpu-throttling: "false"
+        run.googleapis.com/execution-environment: gen2
+    spec:
+      containerConcurrency: 50
+      timeoutSeconds: 600
+      containers:
+      - name: gateway
+        image: gcr.io/PROJECT_ID/openclaw-gateway:latest
+        ports:
+        - name: http1
+          containerPort: 18789
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "18789"
+        - name: GATEWAY_MODE
+          value: "cloud"
+        - name: DEPLOYMENT_MODE
+          value: "cloudrun"
+        - name: TZ
+          value: "UTC"
+        # Database connections
+        - name: MONGODB_URI
+          value: "mongodb+srv://user:password@cluster.mongodb.net/openclaw"
+        - name: REDIS_HOST
+          value: "your-redis-host"
+        - name: REDIS_PORT
+          value: "6379"
+        resources:
+          limits:
+            cpu: "2000m"
+            memory: "1Gi"
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 18789
+          initialDelaySeconds: 10
+          timeoutSeconds: 10
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 18789
+          initialDelaySeconds: 0
+          timeoutSeconds: 10
+          periodSeconds: 30
+          failureThreshold: 3

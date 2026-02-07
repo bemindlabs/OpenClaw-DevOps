@@ -1,0 +1,38 @@
+# Cloud Build configuration for Landing Page
+steps:
+  # Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-f'
+      - 'apps/landing/Dockerfile'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/openclaw-landing:${_IMAGE_TAG}'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/openclaw-landing:latest'
+      - '.'
+    timeout: 1200s
+
+  # Push the image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/openclaw-landing:${_IMAGE_TAG}'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/openclaw-landing:latest'
+
+images:
+  - 'gcr.io/$PROJECT_ID/openclaw-landing:${_IMAGE_TAG}'
+  - 'gcr.io/$PROJECT_ID/openclaw-landing:latest'
+
+substitutions:
+  _IMAGE_TAG: 'latest'
+
+options:
+  machineType: 'N1_HIGHCPU_8'
+  logging: CLOUD_LOGGING_ONLY
+  
+timeout: 1800s

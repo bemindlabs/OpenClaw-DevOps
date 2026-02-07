@@ -1,0 +1,38 @@
+# Cloud Build configuration for Assistant Portal
+steps:
+  # Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-f'
+      - 'apps/assistant/Dockerfile'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/openclaw-assistant:${_IMAGE_TAG}'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/openclaw-assistant:latest'
+      - '.'
+    timeout: 1200s
+
+  # Push the image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/openclaw-assistant:${_IMAGE_TAG}'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/openclaw-assistant:latest'
+
+images:
+  - 'gcr.io/$PROJECT_ID/openclaw-assistant:${_IMAGE_TAG}'
+  - 'gcr.io/$PROJECT_ID/openclaw-assistant:latest'
+
+substitutions:
+  _IMAGE_TAG: 'latest'
+
+options:
+  machineType: 'N1_HIGHCPU_8'
+  logging: CLOUD_LOGGING_ONLY
+  
+timeout: 1800s

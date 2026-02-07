@@ -1,0 +1,72 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: openclaw-assistant
+  labels:
+    app: openclaw
+    component: assistant
+    environment: production
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "10"
+        run.googleapis.com/cpu-throttling: "true"
+        run.googleapis.com/execution-environment: gen2
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      containers:
+      - name: assistant
+        image: gcr.io/PROJECT_ID/openclaw-assistant:latest
+        ports:
+        - name: http1
+          containerPort: 5555
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "5555"
+        - name: NEXT_TELEMETRY_DISABLED
+          value: "1"
+        - name: TZ
+          value: "UTC"
+        # Gateway connection
+        - name: NEXT_PUBLIC_GATEWAY_URL
+          value: "https://openclaw-gateway-HASH-uc.a.run.app"
+        # NextAuth
+        - name: NEXTAUTH_URL
+          value: "https://openclaw-assistant-HASH-uc.a.run.app"
+        - name: NEXTAUTH_SECRET
+          value: "CHANGE_ME_NEXTAUTH_SECRET"
+        # Google OAuth
+        - name: GOOGLE_CLIENT_ID
+          value: "your-google-client-id"
+        - name: GOOGLE_CLIENT_SECRET
+          value: "your-google-client-secret"
+        # Database connections
+        - name: MONGODB_URI
+          value: "mongodb+srv://user:password@cluster.mongodb.net/openclaw"
+        - name: REDIS_HOST
+          value: "your-redis-host"
+        resources:
+          limits:
+            cpu: "1000m"
+            memory: "512Mi"
+        startupProbe:
+          httpGet:
+            path: /
+            port: 5555
+          initialDelaySeconds: 10
+          timeoutSeconds: 10
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 5555
+          initialDelaySeconds: 0
+          timeoutSeconds: 10
+          periodSeconds: 30
+          failureThreshold: 3

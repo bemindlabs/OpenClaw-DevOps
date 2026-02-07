@@ -1,0 +1,22 @@
+version: '3.8'
+
+# Local development Docker Compose overrides
+# This file extends the main docker-compose.yml for local development
+
+services:
+  nginx:
+    restart: unless-stopped
+    labels:
+      environment: "development"
+      deployment: "local"
+
+  landing:
+    restart: unless-stopped
+    labels:
+      environment: "development"
+      deployment: "local"
+    # Uncomment for development with hot reload
+    # volumes:
+    #   - ../../apps/landing:/app
+    #   - /app/node_modules
+    #   - /app/.next
