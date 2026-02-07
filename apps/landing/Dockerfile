@@ -9,7 +9,7 @@ WORKDIR /monorepo
 RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 
 # Copy monorepo root files
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc tsconfig.json ./
 COPY apps/landing/package.json ./apps/landing/
 
 # Install dependencies
@@ -44,10 +44,12 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy necessary files from builder
-COPY --from=builder /monorepo/apps/landing/public ./public
+# Copy the entire standalone build (includes monorepo structure with symlinks intact)
 COPY --from=builder --chown=nextjs:nodejs /monorepo/apps/landing/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /monorepo/apps/landing/.next/static ./.next/static
+# Copy static files
+COPY --from=builder --chown=nextjs:nodejs /monorepo/apps/landing/.next/static ./apps/landing/.next/static
+# Copy public files
+COPY --from=builder /monorepo/apps/landing/public ./apps/landing/public
 
 USER nextjs
 
@@ -56,4 +58,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+# Server.js is at apps/landing/server.js in the standalone structure
+CMD ["node", "apps/landing/server.js"]

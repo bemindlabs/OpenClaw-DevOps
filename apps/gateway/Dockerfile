@@ -13,8 +13,10 @@ RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
 COPY apps/gateway/package.json ./apps/gateway/
 
-# Install production dependencies only
-RUN pnpm install --frozen-lockfile --filter @openclaw/gateway... --prod
+# Install production dependencies only (skip prepare scripts like husky)
+ENV CI=true
+RUN pnpm install --frozen-lockfile --filter @openclaw/gateway... --prod --ignore-scripts || \
+    pnpm install --frozen-lockfile --filter @openclaw/gateway... --prod
 
 # Stage 2: Builder
 FROM node:20-alpine AS builder

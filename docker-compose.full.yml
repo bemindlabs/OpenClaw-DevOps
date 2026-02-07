@@ -402,7 +402,7 @@ services:
 
   # MongoDB Exporter - MongoDB Metrics
   mongodb-exporter:
-    image: percona/mongodb_exporter:latest
+    image: percona/mongodb_exporter:0.40
     container_name: openclaw-mongodb-exporter
     restart: unless-stopped
     network_mode: "host"

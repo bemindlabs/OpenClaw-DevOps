@@ -9,7 +9,7 @@ WORKDIR /monorepo
 RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 
 # Copy monorepo root files
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc tsconfig.json ./
 COPY apps/assistant/package.json ./apps/assistant/
 
 # Install dependencies
@@ -44,16 +44,12 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy necessary files from builder
-COPY --from=builder /monorepo/apps/assistant/public ./public
-
-# Set proper permissions for prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
-
-# Copy standalone server
+# Copy the entire standalone build (includes monorepo structure with symlinks intact)
 COPY --from=builder --chown=nextjs:nodejs /monorepo/apps/assistant/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /monorepo/apps/assistant/.next/static ./.next/static
+# Copy static files
+COPY --from=builder --chown=nextjs:nodejs /monorepo/apps/assistant/.next/static ./apps/assistant/.next/static
+# Copy public files
+COPY --from=builder /monorepo/apps/assistant/public ./apps/assistant/public
 
 USER nextjs
 
@@ -62,4 +58,5 @@ EXPOSE 5555
 ENV PORT=5555
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+# Server.js is at apps/assistant/server.js in the standalone structure
+CMD ["node", "apps/assistant/server.js"]
