@@ -1,0 +1,95 @@
+{
+  "meta": {
+    "lastTouchedVersion": "2026.1.29",
+    "lastTouchedAt": "${TIMESTAMP}"
+  },
+  "wizard": {
+    "lastRunMode": "${DEPLOYMENT_MODE}"
+  },
+  "auth": {
+    "profiles": {
+      "google:default": {
+        "provider": "google",
+        "mode": "api_key"
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "${AI_MODEL_PRIMARY}"
+      },
+      "models": {
+        "${AI_MODEL_PRIMARY}": {}
+      },
+      "workspace": "/app/workspace",
+      "compaction": {
+        "mode": "safeguard"
+      },
+      "maxConcurrent": ${MAX_CONCURRENT_AGENTS},
+      "subagents": {
+        "maxConcurrent": ${MAX_CONCURRENT_SUBAGENTS}
+      }
+    }
+  },
+  "messages": {
+    "ackReactionScope": "group-mentions"
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto"
+  },
+  "hooks": {
+    "internal": {
+      "enabled": true,
+      "entries": {
+        "boot-md": {
+          "enabled": true
+        },
+        "command-logger": {
+          "enabled": true
+        }
+      }
+    }
+  },
+  "channels": {
+    "telegram": {
+      "enabled": ${TELEGRAM_ENABLED},
+      "dmPolicy": "pairing",
+      "botToken": "${TELEGRAM_BOT_TOKEN}",
+      "groupPolicy": "allowlist",
+      "streamMode": "partial"
+    }
+  },
+  "gateway": {
+    "port": ${GATEWAY_PORT},
+    "mode": "${GATEWAY_MODE}",
+    "bind": "${GATEWAY_BIND}",
+    "auth": {
+      "mode": "token",
+      "token": "${GATEWAY_AUTH_TOKEN}"
+    },
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    },
+    "trustedProxies": [
+      "127.0.0.1",
+      "::1",
+      "172.16.0.0/12",
+      "192.168.0.0/16"
+    ]
+  },
+  "skills": {
+    "install": {
+      "nodeManager": "npm"
+    }
+  },
+  "plugins": {
+    "entries": {
+      "telegram": {
+        "enabled": ${TELEGRAM_ENABLED}
+      }
+    }
+  }
+}
