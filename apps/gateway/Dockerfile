@@ -47,14 +47,17 @@ RUN adduser --system --uid 1001 gateway
 # Add gateway user to root group for Docker socket access (macOS Docker Desktop)
 RUN adduser gateway root
 
-# Copy node_modules and app from builder
+# Copy the entire monorepo node_modules to preserve pnpm symlinks
 COPY --from=builder /monorepo/node_modules ./node_modules
-COPY --from=builder /monorepo/apps/gateway ./
+# Copy gateway app
+COPY --from=builder /monorepo/apps/gateway ./apps/gateway
 
 # Change ownership
 RUN chown -R gateway:nodejs /app
 
 USER gateway
+
+WORKDIR /app/apps/gateway
 
 EXPOSE 18789
 
