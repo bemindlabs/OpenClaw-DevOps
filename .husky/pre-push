@@ -1,0 +1,10 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🚀 Running pre-push checks..."
+
+# Build all apps to ensure they compile
+echo "🏗️  Building all apps..."
+pnpm build:all
+
+echo "✅ All pre-push checks passed!"

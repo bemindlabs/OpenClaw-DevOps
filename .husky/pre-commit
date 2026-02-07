@@ -1,0 +1,11 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit checks..."
+
+# Run lint-staged on staged files
+pnpm lint-staged
+
+# Type check all TypeScript files
+echo "🔧 Type checking..."
+pnpm typecheck
