@@ -21,36 +21,69 @@ Production-ready Next.js 15 landing page for the OpenClaw AI Agent Platform.
 
 ## Getting Started
 
-### Development
+### Quick Start (Full Stack)
+
+The easiest way to run the landing page with all OpenClaw services:
 
 ```bash
-# Install dependencies
-npm install
+# From project root (/Users/lps/server/)
+./start-all.sh
 
-# Run development server
-npm run dev
+# This will:
+# 1. Build all Docker images (landing, assistant, gateway, nginx)
+# 2. Start all containers with docker-compose
+# 3. Verify all services are running
+# 4. Show service URLs and helpful commands
+
+# Access the landing page at:
+# http://localhost:3000
+```
+
+The quick start script uses `make` commands under the hood. See the root README for all available commands.
+
+### Development (This App Only)
+
+If you want to run just the landing page in development mode:
+
+```bash
+# Install dependencies (from monorepo root)
+pnpm install
+
+# Run landing dev server
+pnpm dev:landing
+# or from root:
+make dev-landing
 
 # Open http://localhost:3000
 ```
 
-### Production Build
+### Production Build (Standalone)
 
 ```bash
 # Build for production
-npm run build
+pnpm build
 
 # Start production server
-npm start
+pnpm start
 ```
 
 ### Linting
 
 ```bash
 # Run ESLint
-npm run lint
+pnpm lint
 ```
 
 ## Docker Deployment
+
+### Quick Start Script (Recommended)
+
+```bash
+# From project root
+./start-all.sh
+```
+
+This handles building, starting, and health checking all services.
 
 ### Build and Run with Docker Compose
 
@@ -68,8 +101,8 @@ docker-compose down
 ### Build Docker Image Manually
 
 ```bash
-# Build the image
-docker build -t openclaw-landing .
+# Build the image (from project root)
+docker build -t openclaw-landing -f apps/landing/Dockerfile .
 
 # Run the container
 docker run -p 3000:3000 openclaw-landing
