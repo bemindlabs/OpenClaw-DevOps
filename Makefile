@@ -184,16 +184,7 @@ restart-full: ## Restart full stack
 	@sleep 2
 	@make start-full
 
-##@ Development
-
-dev-landing: ## Start landing page in dev mode (hot reload)
-	@cd apps/landing && pnpm dev
-
-dev-assistant: ## Start assistant portal in dev mode (hot reload)
-	@cd apps/assistant && pnpm dev
-
-dev-gateway: ## Start gateway service in dev mode (hot reload)
-	@cd apps/gateway && pnpm dev
+##@ Code Quality
 
 lint: ## Run linters on all apps
 	@echo "$(YELLOW)Running linters...$(NC)"
@@ -498,63 +489,11 @@ all: setup install build start ## Complete setup from scratch (setup → install
 	@echo ""
 	@make status
 
-onboard: ## Interactive onboarding guide for new users
-	@echo "$(BLUE)╔════════════════════════════════════════════╗$(NC)"
-	@echo "$(BLUE)║  Welcome to OpenClaw DevOps!              ║$(NC)"
-	@echo "$(BLUE)╚════════════════════════════════════════════╝$(NC)"
-	@echo ""
-	@echo "This onboarding will guide you through the setup process."
-	@echo ""
-	@echo "$(YELLOW)Step 1: Prerequisites$(NC)"
-	@echo "  - Node.js 20+ (check: node --version)"
-	@echo "  - Docker (check: docker --version)"
-	@echo "  - pnpm (will be installed if missing)"
-	@echo ""
-	@read -p "$(BLUE)Do you have Node.js 20+ and Docker installed? [y/N] $(NC)" confirm; \
-	if [ "$$confirm" != "y" ] && [ "$$confirm" != "Y" ]; then \
-		echo ""; \
-		echo "$(YELLOW)Please install prerequisites first:$(NC)"; \
-		echo "  Node.js: https://nodejs.org/"; \
-		echo "  Docker: https://docs.docker.com/get-docker/"; \
-		exit 1; \
-	fi
-	@echo ""
-	@echo "$(YELLOW)Step 2: Initial Setup$(NC)"
-	@make setup
-	@echo ""
-	@echo "$(YELLOW)Step 3: Configure Environment$(NC)"
-	@echo "The .env file has been created from .env.example"
-	@echo ""
-	@read -p "$(BLUE)Would you like to edit .env now? [y/N] $(NC)" edit_env; \
-	if [ "$$edit_env" = "y" ] || [ "$$edit_env" = "Y" ]; then \
-		$$EDITOR .env || vi .env; \
-	else \
-		echo "$(YELLOW)⚠  Remember to edit .env before deploying to production!$(NC)"; \
-	fi
-	@echo ""
-	@echo "$(YELLOW)Step 4: Install Dependencies$(NC)"
-	@make install
-	@echo ""
-	@echo "$(YELLOW)Step 5: Build Docker Images$(NC)"
-	@echo "This may take 5-10 minutes..."
-	@make build
-	@echo ""
-	@echo "$(YELLOW)Step 6: Start Services$(NC)"
-	@make start
-	@echo ""
-	@echo "$(GREEN)╔════════════════════════════════════════════╗$(NC)"
-	@echo "$(GREEN)║  🎉 Onboarding Complete!                  ║$(NC)"
-	@echo "$(GREEN)╚════════════════════════════════════════════╝$(NC)"
-	@echo ""
-	@echo "$(BLUE)Next steps:$(NC)"
-	@echo "  - View logs: make logs"
-	@echo "  - Check health: make health"
-	@echo "  - View help: make help"
-	@echo ""
-	@echo "$(BLUE)Documentation:$(NC)"
-	@echo "  - README.md - Project overview"
-	@echo "  - CLAUDE.md - Developer guide"
-	@echo "  - DEPLOYMENT.md - Deployment instructions"
+onboarding: ## Interactive onboarding guide - complete setup with configuration help
+	@chmod +x scripts/onboarding.sh
+	@./scripts/onboarding.sh
+
+onboard: onboarding ## Alias for onboarding
 
 ##@ Info
 
