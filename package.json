@@ -1,0 +1,45 @@
+{
+  "name": "@openclaw/devops",
+  "version": "1.0.0",
+  "private": true,
+  "description": "OpenClaw DevOps Platform - Monorepo",
+  "scripts": {
+    "dev:landing": "pnpm --filter @openclaw/landing dev",
+    "dev:assistant": "pnpm --filter @openclaw/assistant dev",
+    "dev:gateway": "pnpm --filter @openclaw/gateway dev",
+    "dev:all": "concurrently -n landing,assistant,gateway -c blue,magenta,green \"pnpm dev:landing\" \"pnpm dev:assistant\" \"pnpm dev:gateway\"",
+    "build:landing": "pnpm --filter @openclaw/landing build",
+    "build:assistant": "pnpm --filter @openclaw/assistant build",
+    "build:gateway": "pnpm --filter @openclaw/gateway build",
+    "build:all": "pnpm -r build",
+    "lint:landing": "pnpm --filter @openclaw/landing lint",
+    "lint:assistant": "pnpm --filter @openclaw/assistant lint",
+    "lint:all": "pnpm -r lint",
+    "typecheck": "pnpm -r exec tsc --noEmit",
+    "clean": "pnpm -r exec rm -rf node_modules .next dist && rm -rf node_modules",
+    "clean:all": "pnpm clean",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.1",
+    "typescript": "^5.0.0"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  }
+}
