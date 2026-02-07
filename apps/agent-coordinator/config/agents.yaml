@@ -1,0 +1,208 @@
+# Agent Coordinator Configuration
+# Configure agents, prompts, and workflows
+
+# Project settings
+project:
+  name: "OpenClaw DevOps"
+  base_dir: "/Users/lps/server"
+  solutions_dir: "$HOME/Solutions"
+  epics_dir: "$HOME/Solutions/.epics"
+  sessions_file: "$HOME/.claude/agent-sessions.json"
+
+# Agent definitions
+agents:
+  # Internal agents (Task tool based)
+  internal:
+    explore:
+      type: "Explore"
+      description: "Fast codebase exploration"
+      output_dir: "research"
+      output_file: "codebase-analysis.json"
+      prompt_template: "explore.md"
+      enabled: true
+
+    plan:
+      type: "Plan"
+      description: "Software architecture design"
+      output_dir: "planning"
+      output_file: "plan.md"
+      prompt_template: "plan.md"
+      enabled: true
+
+    research:
+      type: "general-purpose"
+      description: "Best practices research"
+      output_dir: "research"
+      output_file: "best-practices.json"
+      prompt_template: "research.md"
+      enabled: true
+
+    implement:
+      type: "software-engineer"
+      description: "Code implementation"
+      output_dir: "implementation"
+      output_file: "changes.patch"
+      prompt_template: "implement.md"
+      enabled: true
+
+    review:
+      type: "qa-test-engineer"
+      description: "Quality assurance review"
+      output_dir: "review"
+      output_file: "qa-report.md"
+      prompt_template: "review.md"
+      enabled: true
+
+  # External agents (CLI based via tmux)
+  external:
+    gemini:
+      cli: "gemini"
+      description: "Web search and patterns"
+      output_dir: "agents/gemini"
+      output_file: "research.json"
+      prompt_template: "gemini.md"
+      enabled: true
+      timeout: 300
+
+    codex:
+      cli: "codex"
+      description: "Code analysis"
+      output_dir: "agents/codex"
+      output_file: "analysis.json"
+      prompt_template: "codex.md"
+      enabled: true
+      timeout: 300
+
+    claude:
+      cli: "claude"
+      description: "Review and verification"
+      output_dir: "agents/claude"
+      output_file: "verification.md"
+      prompt_template: "claude.md"
+      enabled: false  # Disabled by default (main coordinator handles this)
+      timeout: 600
+
+    # Custom agents - add your own here
+    # custom_agent:
+    #   cli: "your-cli-command"
+    #   description: "What this agent does"
+    #   output_dir: "agents/custom"
+    #   output_file: "output.json"
+    #   prompt_template: "custom.md"
+    #   enabled: false
+    #   timeout: 300
+
+# Epic directory structure
+epic_structure:
+  directories:
+    - research
+    - planning
+    - implementation
+    - review
+    - docs
+    - agents/gemini
+    - agents/codex
+    - agents/claude
+    - agents/custom
+
+  files:
+    readme: "README.md"
+    tasks: "planning/tasks.json"
+    summary: "review/agent-summary.md"
+    final_report: "review/final-report.md"
+
+# Tmux configuration
+tmux:
+  session_prefix: "epic"
+  windows:
+    - name: coordinator
+      directory: ""  # Epic root
+    - name: gemini
+      directory: "agents/gemini"
+    - name: codex
+      directory: "agents/codex"
+    - name: claude
+      directory: "agents/claude"
+
+# Workflow configuration
+workflows:
+  default:
+    name: "Standard Development"
+    phases:
+      - name: research
+        agents:
+          internal: [explore, research]
+          external: [gemini]
+        parallel: true
+
+      - name: planning
+        agents:
+          internal: [plan]
+          external: [codex]
+        parallel: true
+        depends_on: [research]
+
+      - name: implementation
+        agents:
+          internal: [implement]
+          external: []
+        parallel: false
+        depends_on: [planning]
+
+      - name: review
+        agents:
+          internal: [review]
+          external: []
+        parallel: false
+        depends_on: [implementation]
+
+  research_only:
+    name: "Research Only"
+    phases:
+      - name: research
+        agents:
+          internal: [explore, research]
+          external: [gemini, codex]
+        parallel: true
+
+  quick_fix:
+    name: "Quick Fix"
+    phases:
+      - name: analyze
+        agents:
+          internal: [explore]
+          external: []
+        parallel: false
+
+      - name: fix
+        agents:
+          internal: [implement]
+          external: []
+        parallel: false
+        depends_on: [analyze]
+
+# Output formats
+output:
+  formats:
+    - json
+    - markdown
+    - yaml
+
+  consolidation:
+    enabled: true
+    format: markdown
+    include_timestamps: true
+    include_metrics: true
+
+# Logging configuration
+logging:
+  level: info
+  format: "[{timestamp}] [{level}] {message}"
+  output:
+    - console
+    - file
+
+  file:
+    path: "$EPIC_DIR/logs/coordinator.log"
+    max_size: 10MB
+    rotate: true
