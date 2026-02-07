@@ -93,6 +93,22 @@ $(pwd)/
 
 ### Quick Start
 
+**For First-Time Setup (Recommended):**
+```bash
+# Interactive onboarding with configuration help
+make onboarding
+
+# This will guide you through:
+#   1. Prerequisites check (Node.js, Docker, pnpm)
+#   2. Environment file setup (.env)
+#   3. Domain configuration
+#   4. Security & password generation
+#   5. OAuth setup (Google)
+#   6. Optional services (Telegram, monitoring)
+#   7. Installation & startup
+```
+
+**Manual Setup:**
 ```bash
 # Install dependencies (first time)
 cd $(pwd)
@@ -104,6 +120,77 @@ pnpm install
 # Or manually
 docker-compose up -d
 ```
+
+### Interactive Onboarding
+
+The `make onboarding` command provides an interactive setup wizard that configures all aspects of the platform:
+
+**What It Configures:**
+1. **Prerequisites Validation**
+   - Node.js 20+ version check
+   - Docker installation and daemon status
+   - pnpm installation (auto-installs if missing)
+   - Disk space availability
+
+2. **Environment Setup**
+   - Creates/backs up .env file
+   - Option to reconfigure existing setup
+
+3. **Domain Configuration**
+   - Production domains (e.g., mycompany.com)
+   - Development with localhost
+   - Local domain testing (e.g., example.local)
+   - Automatic CORS and NextAuth URL configuration
+
+4. **Security Configuration**
+   - Auto-generates 32+ character passwords for:
+     - MongoDB (root and user)
+     - PostgreSQL
+     - Redis
+     - n8n (password and encryption key)
+     - Grafana
+     - NextAuth secret
+     - Gateway authentication token
+   - Environment mode (development/production)
+
+5. **OAuth & Authentication**
+   - Google OAuth Client ID configuration
+   - Allowed email domain whitelist
+   - Guided credential creation
+
+6. **Optional Services**
+   - Telegram bot integration
+   - Full monitoring stack (Prometheus, Grafana, n8n)
+   - Database services (MongoDB, PostgreSQL, Redis)
+
+7. **Installation & Startup**
+   - Dependency installation
+   - Docker image building
+   - Service startup (basic or full stack)
+   - Health check validation
+
+**Usage:**
+```bash
+# Run interactive onboarding
+make onboarding
+
+# Or use the alias
+make onboard
+```
+
+**Features:**
+- ✅ Input validation (domains, emails)
+- ✅ Smart defaults based on deployment type
+- ✅ Automatic .env backup before changes
+- ✅ Configuration summary at completion
+- ✅ Skip options for each step
+- ✅ Colored, user-friendly terminal UI
+
+**When to Use:**
+- First-time project setup
+- Reconfiguring for new environment
+- Setting up additional developer machines
+- Migrating between environments (dev → staging → prod)
 
 ### pnpm Workspace Commands
 
