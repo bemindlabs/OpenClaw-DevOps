@@ -1,6 +1,6 @@
 {
   "name": "@openclaw/devops",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "private": true,
   "description": "OpenClaw DevOps Platform - Monorepo",
   "scripts": {
@@ -18,6 +18,12 @@
     "typecheck": "pnpm -r exec tsc --noEmit",
     "clean": "pnpm -r exec rm -rf node_modules .next dist && rm -rf node_modules",
     "clean:all": "pnpm clean",
+    "security:install": "./scripts/install-security-tools.sh",
+    "security:scan": "./scripts/security-scan.sh --all",
+    "security:trivy": "./scripts/security-scan.sh --trivy",
+    "security:semgrep": "./scripts/security-scan.sh --semgrep",
+    "security:docker": "./scripts/security-scan.sh --trivy --docker",
+    "security:fix": "./scripts/security-scan.sh --semgrep --fix",
     "prepare": "husky"
   },
   "devDependencies": {

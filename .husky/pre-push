@@ -7,4 +7,16 @@ echo "🚀 Running pre-push checks..."
 echo "🏗️  Building all apps..."
 pnpm build:all
 
+# Optional: Run security scan before push
+# Uncomment to enable security scanning on every push
+# echo "🔒 Running security scan..."
+# if command -v trivy &> /dev/null && command -v semgrep &> /dev/null; then
+#   echo "  • Scanning for vulnerabilities (Trivy)..."
+#   trivy fs --severity CRITICAL,HIGH --exit-code 0 . > /dev/null 2>&1 || echo "⚠️  Vulnerabilities found"
+#   echo "  • Scanning code (Semgrep)..."
+#   semgrep scan --config auto --config p/security-audit --error --quiet . || echo "⚠️  Security issues found"
+# else
+#   echo "⚠️  Security tools not installed. Run: make security-install"
+# fi
+
 echo "✅ All pre-push checks passed!"

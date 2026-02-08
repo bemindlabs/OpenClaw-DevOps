@@ -1,8 +1,16 @@
 # OpenClaw DevOps
 
+[![Status](https://img.shields.io/badge/Status-Under%20Development-yellow)](https://github.com/bemindlabs/OpenClaw-DevOps)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+> **⚠️ Project Status: Under Active Development**
+>
+> This project is currently under active development. Features may be incomplete, APIs may change, and documentation may be outdated. See [CHANGELOG.md](CHANGELOG.md) for recent changes.
+
 Full-stack OpenClaw DevOps platform with Next.js landing page, AI-powered gateway, admin portal, databases, messaging, and monitoring infrastructure.
 
 **✨ New Features:**
+
 - 🤖 **Multi-Provider LLM Chat** - OpenAI, Anthropic, Google AI, Moonshot support
 - 💬 **AI Assistant** - Built-in chat interface with command & assistant modes
 - 🔄 **Automatic Fallback** - Seamless provider switching on failures
@@ -12,6 +20,7 @@ Full-stack OpenClaw DevOps platform with Next.js landing page, AI-powered gatewa
 ## ✅ Current Status
 
 **Working Services:**
+
 - ✅ Landing Page (http://localhost:3000)
 - ✅ Assistant Portal (http://localhost:5555) - **NEW!**
 - ✅ Gateway API (http://localhost:18789)
@@ -22,6 +31,7 @@ Full-stack OpenClaw DevOps platform with Next.js landing page, AI-powered gatewa
 - ✅ cAdvisor Metrics
 
 **AI/LLM Features:**
+
 - ✅ OpenAI Integration (GPT-4o)
 - ⚠️ Anthropic (no credits)
 - ⚠️ Google AI (configuration needed)
@@ -262,12 +272,14 @@ npm run dev
 The gateway includes a sophisticated LLM service with automatic fallback support:
 
 **Supported Providers:**
+
 - ✅ **OpenAI** (GPT-4, GPT-4o, GPT-3.5) - Primary provider
 - ✅ **Anthropic** (Claude 3.5 Sonnet, Claude 3 Opus)
 - ✅ **Google AI** (Gemini Pro, Gemini Flash)
 - ✅ **Moonshot/Kimi** (Chinese LLM with OpenAI-compatible API)
 
 **Features:**
+
 - **Automatic Fallback** - If primary provider fails, automatically tries alternative providers
 - **Session Management** - Maintains conversation history per session (last 20 messages)
 - **Provider Selection** - Configure primary and fallback providers via environment variables
@@ -278,6 +290,7 @@ The gateway includes a sophisticated LLM service with automatic fallback support
 **Endpoint:** `POST http://localhost:18789/api/chat/message`
 
 **Request:**
+
 ```json
 {
   "message": "Your message here",
@@ -287,6 +300,7 @@ The gateway includes a sophisticated LLM service with automatic fallback support
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -299,6 +313,7 @@ The gateway includes a sophisticated LLM service with automatic fallback support
 ```
 
 **Example:**
+
 ```bash
 curl -X POST http://localhost:18789/api/chat/message \
   -H "Content-Type: application/json" \
@@ -310,6 +325,7 @@ curl -X POST http://localhost:18789/api/chat/message \
 Access the AI-powered admin portal at **http://localhost:5555**
 
 **Features:**
+
 - 💬 Dual-mode chat interface (Command mode & Assistant mode)
 - 🔐 Google OAuth authentication
 - 📊 Real-time service monitoring
@@ -632,9 +648,47 @@ docker exec openclaw-assistant printenv | grep GATEWAY
 #   - CORS_ORIGIN (your actual domains)
 #   - ALLOWED_OAUTH_DOMAINS (your company domains)
 
-# 3. Review security documentation
+# 3. Install security scanning tools
+make security-install
+
+# 4. Run security scan
+make security-scan
+
+# 5. Review security documentation
 cat SECURITY.md
 ```
+
+### 🛡️ Security Scanning
+
+Automated security scanning with **Trivy** and **Semgrep**:
+
+```bash
+# Install tools
+make security-install
+
+# Run all scans
+make security-scan
+
+# Scan Docker images
+make security-docker
+
+# Fix issues automatically (Semgrep)
+make security-fix
+```
+
+**Features:**
+
+- ✅ Vulnerability scanning (dependencies, Docker images)
+- ✅ Code security analysis (OWASP Top 10, XSS, SQL injection)
+- ✅ Secret detection (API keys, credentials)
+- ✅ Configuration validation (Docker, IaC)
+- ✅ Automated CI/CD scanning on every push/PR
+- ✅ GitHub Security integration (SARIF reports)
+
+**Documentation:**
+
+- [SECURITY-SCANNING.md](SECURITY-SCANNING.md) - Complete guide
+- [SECURITY-QUICKSTART.md](SECURITY-QUICKSTART.md) - Quick reference
 
 ### Security Features
 

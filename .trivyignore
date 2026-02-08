@@ -1,0 +1,12 @@
+# Trivy Ignore File
+# Add vulnerability IDs to ignore specific findings
+# Format: CVE-YYYY-NNNNN or GHSA-xxxx-xxxx-xxxx
+
+# Example: Ignore a specific vulnerability
+# CVE-2021-12345
+
+# Example: Ignore all vulnerabilities in a specific package
+# pkg:npm/package-name
+
+# Development dependencies (not used in production)
+# Add specific CVEs for dev dependencies if needed

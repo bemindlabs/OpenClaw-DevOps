@@ -29,6 +29,7 @@ This project uses **pnpm workspaces** for monorepo management.
 **Package Manager:** pnpm v9+
 
 **Workspace Apps:**
+
 - `@openclaw/landing` - Landing page (Next.js)
 - `@openclaw/assistant` - Admin portal (Next.js)
 - `@openclaw/gateway` - API gateway (Express.js)
@@ -36,23 +37,27 @@ This project uses **pnpm workspaces** for monorepo management.
 ### Core Services
 
 **Basic Stack:**
+
 - **Nginx** (port 80/443): Reverse proxy with rate limiting and WebSocket support
 - **Landing Page** (port 3000): Next.js 16 standalone application
 - **Gateway** (port 18789): OpenClaw AI gateway service
 
 **Full Stack (docker-compose.full.yml):**
 
-*Databases:*
+_Databases:_
+
 - **MongoDB** (port 27017): Document database for application data
 - **PostgreSQL** (port 5432): Relational database for structured data and n8n
 - **Redis** (port 6379): Cache, session store, and message broker
 
-*Messaging & Workflows:*
+_Messaging & Workflows:_
+
 - **Kafka** (port 9092): Event streaming platform
 - **Zookeeper** (port 2181): Kafka coordination service
 - **n8n** (port 5678): Workflow automation platform
 
-*Monitoring:*
+_Monitoring:_
+
 - **Prometheus** (port 9090): Metrics collection and alerting
 - **Grafana** (port 3001): Metrics visualization and dashboards
 - **Exporters**: Node, cAdvisor, Redis, PostgreSQL, MongoDB metrics
@@ -94,6 +99,7 @@ $(pwd)/
 ### Quick Start
 
 **For First-Time Setup (Recommended):**
+
 ```bash
 # Interactive onboarding with configuration help
 make onboarding
@@ -109,6 +115,7 @@ make onboarding
 ```
 
 **Manual Setup:**
+
 ```bash
 # Install dependencies (first time)
 cd $(pwd)
@@ -126,6 +133,7 @@ docker-compose up -d
 The `make onboarding` command provides an interactive setup wizard that configures all aspects of the platform:
 
 **What It Configures:**
+
 1. **Prerequisites Validation**
    - Node.js 20+ version check
    - Docker installation and daemon status
@@ -170,6 +178,7 @@ The `make onboarding` command provides an interactive setup wizard that configur
    - Health check validation
 
 **Usage:**
+
 ```bash
 # Run interactive onboarding
 make onboarding
@@ -179,6 +188,7 @@ make onboard
 ```
 
 **Features:**
+
 - ✅ Input validation (domains, emails)
 - ✅ Smart defaults based on deployment type
 - ✅ Automatic .env backup before changes
@@ -187,6 +197,7 @@ make onboard
 - ✅ Colored, user-friendly terminal UI
 
 **When to Use:**
+
 - First-time project setup
 - Reconfiguring for new environment
 - Setting up additional developer machines
@@ -309,17 +320,20 @@ curl http://localhost:3001/api/health # Grafana
 ### Docker Networking
 
 **macOS/Windows (Development):**
+
 - Uses **bridge networking** with port mappings
 - Services communicate via Docker service names (e.g., `landing:3000`, `gateway:18789`)
 - Ports exposed: `80:80`, `3000:3000`, `18789:18789`
 
 **Linux (Production):**
+
 - Can use **host networking** for better performance
 - Services communicate via `localhost` or `127.0.0.1`
 - No port mapping needed (direct host network access)
 
 **Current Configuration:**
 The project is configured for bridge networking (macOS compatible). To switch to host mode for Linux deployments:
+
 1. Remove `ports:` sections from docker-compose.yml
 2. Add `network_mode: "host"` to each service
 3. Update nginx upstream servers to use `127.0.0.1` instead of service names
@@ -327,6 +341,7 @@ The project is configured for bridge networking (macOS compatible). To switch to
 ### Next.js Standalone Build
 
 Landing page uses `output: "standalone"` in `next.config.ts`:
+
 - Optimized production build in `.next/standalone/`
 - Multi-stage Dockerfile for minimal image size
 - Faster cold starts
@@ -342,6 +357,7 @@ nginx/conf.d/
 ```
 
 Each config includes:
+
 - Rate limiting (100 req/min for landing, 60 req/min for gateway)
 - WebSocket support (Upgrade headers)
 - Health check endpoint at `/health`
@@ -394,6 +410,108 @@ docker-compose -f docker-compose.full.yml exec kafka \
   kafka-topics --list --bootstrap-server localhost:9092
 ```
 
+### Security Scanning
+
+The project includes comprehensive security scanning with Trivy and Semgrep.
+
+**Installation:**
+
+```bash
+# Install security tools
+make security-install
+# or
+./scripts/install-security-tools.sh
+```
+
+**Running Scans:**
+
+```bash
+# Run all security scans
+make security-scan
+
+# Run specific scans
+make security-trivy      # Vulnerability scanning
+make security-semgrep    # Code analysis
+make security-docker     # Docker image scanning
+make security-fix        # Auto-fix issues (Semgrep)
+
+# Or use npm scripts
+pnpm security:scan
+pnpm security:trivy
+pnpm security:semgrep
+pnpm security:docker
+pnpm security:fix
+```
+
+**Scan Options:**
+
+```bash
+# Custom severity level
+./scripts/security-scan.sh --all --severity CRITICAL,HIGH
+
+# Save reports to custom directory
+./scripts/security-scan.sh --all --report ./my-reports
+
+# Scan Docker images
+./scripts/security-scan.sh --docker
+
+# Apply automatic fixes
+./scripts/security-scan.sh --semgrep --fix
+```
+
+**Security Scanning Workflow:**
+
+1. **Before Committing:**
+
+   ```bash
+   # Scan for secrets and critical issues
+   make security-trivy
+   ```
+
+2. **Before Pushing:**
+
+   ```bash
+   # Full security scan
+   make security-scan
+   ```
+
+3. **Before Releasing:**
+
+   ```bash
+   # Comprehensive scan including Docker images
+   make security-scan
+   make security-docker
+
+   # Review reports
+   ls -lh ./security-reports/
+   ```
+
+4. **CI/CD Integration:**
+   - Scans run automatically on every push/PR
+   - Results uploaded to GitHub Security tab
+   - Check: Security > Code scanning alerts
+
+**Configuration Files:**
+
+- `trivy.yaml` - Trivy configuration
+- `.trivy-secret.yaml` - Secret detection rules
+- `.trivyignore` - Ignore specific vulnerabilities
+- `.semgrep.yml` - Semgrep configuration
+- `.semgrepignore` - Exclude files from scanning
+
+**Pre-commit Hooks (Optional):**
+
+Enable security scanning in git hooks by uncommenting the security sections in:
+
+- `.husky/pre-commit` - Secret scanning before commits
+- `.husky/pre-push` - Vulnerability scanning before pushes
+
+**Documentation:**
+
+- `SECURITY-SCANNING.md` - Complete security scanning guide
+- `SECURITY-QUICKSTART.md` - Quick reference
+- `SECURITY.md` - General security documentation
+
 ## Troubleshooting
 
 ### Service Not Accessible
@@ -444,6 +562,7 @@ kill -9 <PID>
 ### Health Check Failures
 
 Health checks have a 40-second start period. If showing "unhealthy":
+
 1. Wait 40-60 seconds after container start
 2. Check if wget is available in container: `docker exec <container> which wget`
 3. Test health check manually: `docker exec <container> wget --quiet --tries=1 --spider http://localhost:<port>`
@@ -463,6 +582,7 @@ cd deployments/gce
 ```
 
 **Management Scripts:**
+
 - `deployments/gce/scripts/start.sh [service]` - Start services
 - `deployments/gce/scripts/stop.sh [service]` - Stop services
 - `deployments/gce/scripts/restart.sh [service]` - Restart services
@@ -485,24 +605,30 @@ See `DEPLOYMENT.md` for comprehensive deployment documentation.
 ## Important Notes
 
 ### Security
+
 - Change all default passwords in `.env` before production
 - Use SSL certificates in production (place in `nginx/ssl/`)
 - Configure firewall rules for production servers
 - Monitor access logs regularly
 
 ### Performance
+
 - Containers have health checks with 40s start period
 - Wait for services to become healthy before testing
 - Use `docker-compose logs` to debug startup issues
 
 ### DNS Configuration
+
 Domain names must point to server IP:
+
 - `agents.ddns.net` → Server IP
 - `openclaw.agents.ddns.net` → Server IP
 - `assistant.agents.ddns.net` → Server IP
 
 ### Environment Variables
+
 Critical environment variables in `.env`:
+
 - Database passwords (MongoDB, PostgreSQL, Redis)
 - Google OAuth credentials (for assistant portal)
 - NextAuth secret
@@ -515,6 +641,7 @@ Critical environment variables in `.env`:
 The `/Users/lps/server/docs` directory contains technical documentation following these standards:
 
 **Directory Layout:**
+
 ```
 docs/
 ├── README.md                # Documentation index
@@ -542,6 +669,7 @@ docs/
 #### Documentation Standards
 
 **Format Requirements:**
+
 - All documentation MUST be in Markdown (.md)
 - Use GitHub-flavored Markdown syntax
 - Include table of contents for documents > 200 lines
@@ -549,11 +677,13 @@ docs/
 - Include examples for all concepts
 
 **Naming Conventions:**
+
 - UPPERCASE for root-level docs (e.g., `ARCHITECTURE.md`, `API-REFERENCE.md`)
 - Descriptive, hyphenated names (e.g., `deployment-guide.md`)
 - Prefix with category for grouped docs (e.g., `api-gateway.md`, `api-services.md`)
 
 **Content Standards:**
+
 - **Headers**: Use ATX-style headers (`#`, `##`, `###`)
 - **Code Examples**: Always include working examples with proper syntax highlighting
 - **Links**: Use relative paths for internal documentation
@@ -562,6 +692,7 @@ docs/
 - **Version**: Include version number if applicable
 
 **Required Sections:**
+
 1. Title and brief description
 2. Table of contents (if > 200 lines)
 3. Quick start or overview
@@ -573,21 +704,26 @@ docs/
 #### API Documentation Standards
 
 **API-REFERENCE.md Structure:**
+
 ```markdown
 # API Reference
 
 ## Overview
+
 Brief description of the API
 
 ## Base URL
+
 Production and development URLs
 
 ## Authentication
+
 How to authenticate
 
 ## Endpoints
 
 ### GET /endpoint
+
 - Description
 - Parameters
 - Request example
@@ -595,13 +731,16 @@ How to authenticate
 - Error codes
 
 ## Error Handling
+
 Standard error format
 
 ## Rate Limiting
+
 Rate limit policies
 ```
 
 **API Examples:**
+
 - Include curl examples
 - Show request headers
 - Show full response body
@@ -611,35 +750,45 @@ Rate limit policies
 #### Architecture Documentation Standards
 
 **ARCHITECTURE.md Structure:**
+
 ```markdown
 # Architecture
 
 ## System Overview
+
 High-level description
 
 ## Architecture Diagram
+
 Visual representation
 
 ## Components
+
 Detailed component descriptions
 
 ## Data Flow
+
 How data flows through the system
 
 ## Technology Stack
+
 Technologies used
 
 ## Design Decisions
+
 Why certain choices were made
 
 ## Scalability
+
 How system scales
 
 ## Security Considerations
+
 Security architecture
 ```
 
 **Diagrams:**
+
 - Use ASCII art for simple diagrams
 - Use Mermaid for complex diagrams
 - Include both logical and physical architecture
@@ -649,6 +798,7 @@ Security architecture
 #### Writing Style
 
 **Technical Writing:**
+
 - Be concise and precise
 - Use active voice
 - Write in present tense
@@ -658,6 +808,7 @@ Security architecture
 - Use numbered lists for sequences
 
 **Code Examples:**
+
 ```bash
 # Always include:
 # 1. Comment explaining what the code does
@@ -674,6 +825,7 @@ $ curl https://api.example.com/status
 ```
 
 **Best Practices:**
+
 - ✅ Include working examples
 - ✅ Show both success and error cases
 - ✅ Link to related documentation
@@ -686,6 +838,7 @@ $ curl https://api.example.com/status
 #### Documentation Maintenance
 
 **When to Update:**
+
 - After adding new features
 - When APIs change
 - After architecture changes
@@ -693,6 +846,7 @@ $ curl https://api.example.com/status
 - During security updates
 
 **Update Process:**
+
 1. Update relevant documentation
 2. Move old version to `docs/backup/` if major changes
 3. Update "Last Updated" date
@@ -701,6 +855,7 @@ $ curl https://api.example.com/status
 6. Update links in other docs
 
 **Review Checklist:**
+
 - [ ] All code examples tested
 - [ ] All links work
 - [ ] Screenshots/diagrams current
@@ -713,6 +868,7 @@ $ curl https://api.example.com/status
 #### Special Documentation
 
 **Security Documentation:**
+
 - Store in root directory (e.g., `SECURITY.md`)
 - Include vulnerability disclosure policy
 - Document authentication/authorization
@@ -720,6 +876,7 @@ $ curl https://api.example.com/status
 - List known limitations
 
 **Migration Guides:**
+
 - Store in root or `docs/` directory
 - Include version information
 - Provide step-by-step instructions
@@ -727,6 +884,7 @@ $ curl https://api.example.com/status
 - Include rollback procedures
 
 **Deployment Documentation:**
+
 - Store in root or `docs/` directory
 - Environment-specific instructions
 - Configuration examples
@@ -736,6 +894,7 @@ $ curl https://api.example.com/status
 #### Documentation Tools
 
 **Markdown Linters:**
+
 ```bash
 # Install markdownlint
 npm install -g markdownlint-cli
@@ -745,12 +904,14 @@ markdownlint docs/**/*.md
 ```
 
 **Link Checkers:**
+
 ```bash
 # Check for broken links
 npx markdown-link-check docs/**/*.md
 ```
 
 **Table of Contents Generation:**
+
 ```bash
 # Generate TOC
 npx markdown-toc -i docs/ARCHITECTURE.md
@@ -761,6 +922,7 @@ npx markdown-toc -i docs/ARCHITECTURE.md
 The `docs/README.md` serves as the central index:
 
 **Required Sections:**
+
 1. **Overview** - What's documented
 2. **Quick Links** - Most commonly used docs
 3. **By Category** - Organized documentation list
@@ -768,26 +930,31 @@ The `docs/README.md` serves as the central index:
 5. **Contributing** - How to update documentation
 
 **Example Structure:**
+
 ```markdown
 # Documentation
 
 ## Quick Links
+
 - [Architecture](ARCHITECTURE.md) - System design
 - [API Reference](API-REFERENCE.md) - API documentation
 
 ## By Category
 
 ### Development
+
 - Development workflow
 - Testing guides
 - Debugging
 
 ### Deployment
+
 - Production deployment
 - Environment configuration
 - Monitoring
 
 ### Operations
+
 - Troubleshooting
 - Backup/restore
 - Scaling
@@ -796,6 +963,7 @@ The `docs/README.md` serves as the central index:
 ### Documentation Workflow
 
 **Creating New Documentation:**
+
 1. Determine if it's primary (root/docs) or reference (docs/backup)
 2. Create file with proper naming convention
 3. Follow template for document type
@@ -805,6 +973,7 @@ The `docs/README.md` serves as the central index:
 7. Submit for review
 
 **Updating Existing Documentation:**
+
 1. Read current version
 2. Archive to docs/backup/ if major changes
 3. Make updates
@@ -813,6 +982,7 @@ The `docs/README.md` serves as the central index:
 6. Update related docs if needed
 
 **Archiving Old Documentation:**
+
 ```bash
 # Move to backup with timestamp
 mv docs/OLD-GUIDE.md docs/backup/OLD-GUIDE-20260207.md
@@ -824,6 +994,7 @@ mv docs/OLD-GUIDE.md docs/backup/OLD-GUIDE.md
 ## Additional Resources
 
 ### Root-Level Documentation
+
 - **README.md** - Project overview and quick start
 - **SECURITY.md** - Security guide and vulnerability fixes
 - **DEPLOYMENT-CONFIGURATION.md** - Deployment configuration guide
@@ -831,16 +1002,19 @@ mv docs/OLD-GUIDE.md docs/backup/OLD-GUIDE.md
 - **FINAL-CONFIGURATION-SUMMARY.md** - Complete configuration summary
 
 ### Technical Documentation
+
 - **docs/ARCHITECTURE.md** - System architecture and design
 - **docs/API-REFERENCE.md** - Complete API documentation
 - **docs/README.md** - Documentation index
 
 ### Deployment
+
 - **DEPLOYMENT.md** - Deployment guide
 - **deployments/gce/README.md** - GCE deployment
 - **deployments/local/README.md** - Local development
 
 ### Other Resources
+
 - **CLAUDE.md** - This file (developer guide)
 - **CONTRIBUTING.md** - Contributing guidelines
 - **SERVICES.md** - Services documentation
@@ -848,6 +1022,6 @@ mv docs/OLD-GUIDE.md docs/backup/OLD-GUIDE.md
 
 ---
 
-*Project: OpenClaw DevOps*
-*Location: /Users/lps/server*
-*Updated: 2026-02-07*
+_Project: OpenClaw DevOps_
+_Location: /Users/lps/server_
+_Updated: 2026-02-07_

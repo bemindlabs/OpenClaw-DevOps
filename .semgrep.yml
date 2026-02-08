@@ -1,0 +1,88 @@
+# Semgrep Configuration
+# Documentation: https://semgrep.dev/docs/
+
+# Rules to run
+rules:
+  # Security rules
+  - https://semgrep.dev/p/security-audit
+  - https://semgrep.dev/p/secrets
+  - https://semgrep.dev/p/owasp-top-ten
+  - https://semgrep.dev/p/xss
+  - https://semgrep.dev/p/sql-injection
+  - https://semgrep.dev/p/command-injection
+
+  # JavaScript/TypeScript rules
+  - https://semgrep.dev/p/javascript
+  - https://semgrep.dev/p/typescript
+  - https://semgrep.dev/p/react
+  - https://semgrep.dev/p/nextjs
+
+  # Node.js rules
+  - https://semgrep.dev/p/nodejs
+  - https://semgrep.dev/p/express
+
+  # Docker rules
+  - https://semgrep.dev/p/docker
+
+# Paths to scan
+paths:
+  include:
+    - apps/
+    - nginx/
+    - scripts/
+    - deployments/
+
+  exclude:
+    - node_modules/
+    - .next/
+    - dist/
+    - build/
+    - coverage/
+    - .git/
+    - '*.min.js'
+    - '*.bundle.js'
+    - '**/*.test.ts'
+    - '**/*.test.js'
+    - '**/*.spec.ts'
+    - '**/*.spec.js'
+
+# Output configuration
+output:
+  # Output format: text, json, sarif, gitlab-sast, junit-xml
+  format: text
+
+  # Severity levels to report
+  severity:
+    - ERROR
+    - WARNING
+    - INFO
+
+# Performance settings
+performance:
+  # Maximum number of files to scan in parallel
+  max-memory: 5000
+
+  # Timeout for scanning (in seconds)
+  timeout: 1800
+
+  # Number of jobs to run in parallel
+  jobs: 4
+
+# Autofix settings
+autofix: false
+
+# Metrics collection
+metrics: false
+
+# Ignore patterns
+ignore:
+  # Files to ignore
+  - '*.generated.*'
+  - '*.config.js'
+  - '*.config.ts'
+
+  # Directories to ignore
+  - '.next/'
+  - 'node_modules/'
+  - 'dist/'
+  - 'build/'

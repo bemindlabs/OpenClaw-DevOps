@@ -1,6 +1,6 @@
 {
   "name": "@openclaw/landing",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "private": true,
   "description": "OpenClaw DevOps Landing Page - Next.js 16",
   "scripts": {

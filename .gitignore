@@ -6,6 +6,7 @@
 .env.production
 .env.development
 .env.*.local
+*.env
 
 # Keep .env.example (template without secrets)
 !.env.example
@@ -94,6 +95,14 @@ known_hosts
 # Test coverage
 coverage/
 .nyc_output/
+
+# Security scanning reports
+security-reports/
+*.sarif
+trivy-*.json
+semgrep-*.json
+trivy-*.txt
+semgrep-*.txt
 
 # Package manager
 .pnp/

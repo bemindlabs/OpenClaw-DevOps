@@ -9,12 +9,14 @@ This document outlines security considerations, vulnerabilities addressed, and b
 **Vulnerability**: Unauthenticated Docker service control endpoints allowing anyone to start/stop/restart services.
 
 **Fix Applied**:
+
 - Added Bearer token authentication middleware (`apps/gateway/middleware/auth.js`)
 - Protected all Docker management endpoints (`/api/services/:name/start`, `/stop`, `/restart`)
 - Uses constant-time string comparison to prevent timing attacks
 - Requires `GATEWAY_AUTH_TOKEN` environment variable
 
 **Configuration**:
+
 ```bash
 # Generate secure token
 GATEWAY_AUTH_TOKEN=$(openssl rand -hex 32)
@@ -24,6 +26,7 @@ GATEWAY_AUTH_TOKEN=your_generated_token_here
 ```
 
 **Usage**:
+
 ```bash
 # All Docker management API calls now require authentication
 curl -X POST \
@@ -32,6 +35,7 @@ curl -X POST \
 ```
 
 **Files Modified**:
+
 - `apps/gateway/middleware/auth.js` (NEW)
 - `apps/gateway/routes/services.js`
 - `.env.example`
@@ -43,18 +47,21 @@ curl -X POST \
 **Vulnerability**: `child_process.exec` with string interpolation allowed potential shell injection attacks.
 
 **Fix Applied**:
+
 - Replaced `exec()` with `spawn()` using argument arrays
 - Added whitelist validation for allowed Docker Compose actions
 - Removed hardcoded absolute paths (replaced with `process.cwd()`)
 - Arguments passed as array elements (no shell interpretation)
 
 **Before (Vulnerable)**:
+
 ```javascript
 const cmd = `cd ${PROJECT_DIR} && docker-compose -f ${file} ${action} ${service}`;
 exec(cmd, ...); // Shell interprets the entire command string
 ```
 
 **After (Secure)**:
+
 ```javascript
 const allowedActions = ['start', 'stop', 'restart', 'up', 'down'];
 if (!allowedActions.includes(action)) throw new Error('Invalid action');
@@ -64,6 +71,7 @@ spawn('docker-compose', args, { cwd: PROJECT_DIR }); // No shell interpolation
 ```
 
 **Files Modified**:
+
 - `apps/gateway/services/docker-manager.js`
 
 ---
@@ -73,18 +81,21 @@ spawn('docker-compose', args, { cwd: PROJECT_DIR }); // No shell interpolation
 **Vulnerability**: `ALLOWED_OAUTH_DOMAINS` environment variable used but not defined, causing authentication bypass or denial of service.
 
 **Fix Applied**:
+
 - Added `ALLOWED_OAUTH_DOMAINS` to `.env.example` with clear documentation
 - Default value: `your-domain.com` (must be changed for production)
 - Comma-separated list format for multiple domains
 - Proper handling in `auth.config.ts` already implemented
 
 **Configuration**:
+
 ```bash
 # Add to .env - only users with email from these domains can log in
 ALLOWED_OAUTH_DOMAINS=your-domain.com,trusted-partner.com
 ```
 
 **Files Modified**:
+
 - `.env.example`
 
 ---
@@ -94,23 +105,27 @@ ALLOWED_OAUTH_DOMAINS=your-domain.com,trusted-partner.com
 **Vulnerability**: Default CORS policy of `origin: '*'` allowed requests from any origin, enabling CSRF attacks.
 
 **Fix Applied**:
+
 - Parse `CORS_ORIGIN` environment variable as comma-separated list of allowed origins
 - Development default: `['http://localhost:3000', 'http://localhost:5555']`
 - Production: Requires explicit configuration (no wildcard fallback)
 - Applied to both Express CORS and Socket.IO
 
 **Configuration**:
+
 ```bash
 # Add to .env - list specific origins allowed to access the API
 CORS_ORIGIN=https://assistant.your-domain.com,https://your-domain.com
 ```
 
 **Before (Vulnerable)**:
+
 ```javascript
 app.use(cors({ origin: '*' })); // Allows all origins
 ```
 
 **After (Secure)**:
+
 ```javascript
 const CORS_ORIGINS = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
@@ -123,6 +138,7 @@ app.use(cors({
 ```
 
 **Files Modified**:
+
 - `apps/gateway/index.js`
 - `.env.example`
 
@@ -133,28 +149,32 @@ app.use(cors({
 **Vulnerability**: cAdvisor container ran with `privileged: true`, granting unnecessary full system access.
 
 **Fix Applied**:
+
 - Removed `privileged: true` flag
 - Added specific capabilities: `SYS_ADMIN`, `SYS_PTRACE`
 - Added security option: `apparmor:unconfined` (required for cgroup access)
 - Principle of least privilege - only the capabilities cAdvisor needs
 
 **Before (Vulnerable)**:
+
 ```yaml
 cadvisor:
-  privileged: true  # Full system access
+  privileged: true # Full system access
 ```
 
 **After (Secure)**:
+
 ```yaml
 cadvisor:
   cap_add:
-    - SYS_ADMIN   # Required for cgroup access only
-    - SYS_PTRACE  # Required for process monitoring only
+    - SYS_ADMIN # Required for cgroup access only
+    - SYS_PTRACE # Required for process monitoring only
   security_opt:
-    - apparmor:unconfined  # Required for cAdvisor
+    - apparmor:unconfined # Required for cAdvisor
 ```
 
 **Files Modified**:
+
 - `docker-compose.full.yml`
 
 ---
@@ -164,12 +184,14 @@ cadvisor:
 ### Pre-Deployment Security Steps
 
 - [ ] **Generate Secure Passwords**
+
   ```bash
   cd /path/to/server
   ./scripts/generate-passwords.sh
   ```
 
 - [ ] **Configure Authentication Tokens**
+
   ```bash
   # Gateway authentication
   GATEWAY_AUTH_TOKEN=$(openssl rand -hex 32)
@@ -181,18 +203,21 @@ cadvisor:
   ```
 
 - [ ] **Configure CORS Origins**
+
   ```bash
   # Edit .env - replace with your actual domains
   CORS_ORIGIN=https://assistant.your-domain.com,https://your-domain.com
   ```
 
 - [ ] **Configure OAuth Domain Whitelist**
+
   ```bash
   # Edit .env - only allow trusted email domains
   ALLOWED_OAUTH_DOMAINS=your-company.com,trusted-partner.com
   ```
 
 - [ ] **Review File Permissions**
+
   ```bash
   chmod 600 .env
   chmod 700 scripts/*.sh
@@ -211,14 +236,14 @@ cadvisor:
 
 All Docker service management endpoints now require authentication:
 
-| Endpoint | Method | Auth Required | Description |
-|----------|--------|---------------|-------------|
-| `/api/services/status` | GET | No | View service status |
-| `/api/services/list` | GET | No | List valid services |
-| `/api/services/:name/status` | GET | No | Single service status |
-| `/api/services/:name/start` | POST | **Yes** | Start service |
-| `/api/services/:name/stop` | POST | **Yes** | Stop service |
-| `/api/services/:name/restart` | POST | **Yes** | Restart service |
+| Endpoint                      | Method | Auth Required | Description           |
+| ----------------------------- | ------ | ------------- | --------------------- |
+| `/api/services/status`        | GET    | No            | View service status   |
+| `/api/services/list`          | GET    | No            | List valid services   |
+| `/api/services/:name/status`  | GET    | No            | Single service status |
+| `/api/services/:name/start`   | POST   | **Yes**       | Start service         |
+| `/api/services/:name/stop`    | POST   | **Yes**       | Stop service          |
+| `/api/services/:name/restart` | POST   | **Yes**       | Restart service       |
 
 ### Authentication Header Format
 
@@ -262,6 +287,7 @@ ALLOWED_OAUTH_DOMAINS=your-company.com,partner-company.com
    - Authorized redirect URIs: `https://assistant.your-domain.com/api/auth/callback/google`
 
 2. **Configure Environment**:
+
    ```bash
    GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
    GOOGLE_CLIENT_SECRET=your-client-secret
@@ -289,6 +315,7 @@ CORS_ORIGIN=https://assistant.your-domain.com,https://your-domain.com
 ### Development Mode
 
 In development (`NODE_ENV=development`), localhost origins are automatically allowed:
+
 - `http://localhost:3000` (Landing)
 - `http://localhost:5555` (Assistant)
 
@@ -304,10 +331,10 @@ In production (`NODE_ENV=production`), you **must** explicitly configure `CORS_O
 
 cAdvisor requires specific Linux capabilities to access container metrics:
 
-| Capability | Purpose | Risk Level |
-|------------|---------|------------|
-| `SYS_ADMIN` | Access cgroup filesystem | Medium |
-| `SYS_PTRACE` | Monitor process information | Low |
+| Capability   | Purpose                     | Risk Level |
+| ------------ | --------------------------- | ---------- |
+| `SYS_ADMIN`  | Access cgroup filesystem    | Medium     |
+| `SYS_PTRACE` | Monitor process information | Low        |
 
 **Note**: While still privileged, this is significantly more secure than full `privileged: true` mode.
 
@@ -376,12 +403,105 @@ groups:
       - alert: UnauthorizedAPIAccess
         expr: rate(http_requests_total{status="401"}[5m]) > 10
         annotations:
-          summary: "High rate of unauthorized API access attempts"
+          summary: 'High rate of unauthorized API access attempts'
 
       - alert: DockerServiceManipulation
         expr: rate(docker_service_operations_total[5m]) > 5
         annotations:
-          summary: "Unusual Docker service control activity"
+          summary: 'Unusual Docker service control activity'
+```
+
+---
+
+## Security Scanning & Continuous Monitoring
+
+### Automated Security Scanning
+
+The project includes comprehensive security scanning with **Trivy** and **Semgrep**:
+
+**Trivy** scans for:
+
+- Vulnerabilities in dependencies (npm, Docker images)
+- Configuration misconfigurations (Docker, Kubernetes, IaC)
+- Secret leaks (API keys, credentials, tokens)
+- License compliance issues
+
+**Semgrep** analyzes code for:
+
+- OWASP Top 10 vulnerabilities
+- Security antipatterns (XSS, SQL injection, command injection)
+- Code quality issues
+- Framework-specific vulnerabilities (React, Next.js, Express.js)
+
+### Quick Start
+
+```bash
+# Install security scanning tools
+make security-install
+
+# Run all security scans
+make security-scan
+
+# Run specific scans
+make security-trivy      # Vulnerability scanning
+make security-semgrep    # Code analysis
+make security-docker     # Docker image scanning
+```
+
+### CI/CD Integration
+
+Security scans run automatically:
+
+- ✅ On every push to main/develop
+- ✅ On every pull request
+- ✅ Daily at 2 AM UTC
+- ✅ Manual workflow dispatch
+
+Results are uploaded to **GitHub Security > Code scanning alerts**.
+
+### Configuration Files
+
+- `trivy.yaml` - Trivy configuration
+- `.trivy-secret.yaml` - Secret detection rules
+- `.trivyignore` - Vulnerability exceptions
+- `.semgrep.yml` - Semgrep rules and configuration
+- `.semgrepignore` - Files to exclude from scanning
+
+### Severity Handling
+
+| Severity     | Action Required | Timeline        |
+| ------------ | --------------- | --------------- |
+| **CRITICAL** | Immediate fix   | Within 24 hours |
+| **HIGH**     | Prioritize fix  | Within 7 days   |
+| **MEDIUM**   | Schedule fix    | Within 30 days  |
+| **LOW**      | Consider fix    | As time permits |
+
+### Security Scanning Workflow
+
+1. **Development**: Run `make security-scan` before committing major changes
+2. **Pre-commit** (optional): Enable in `.husky/pre-commit` for secret scanning
+3. **Pre-push** (optional): Enable in `.husky/pre-push` for vulnerability scanning
+4. **CI/CD**: Automated scans on GitHub Actions
+5. **Review**: Check GitHub Security tab for findings
+6. **Remediate**: Fix or document exceptions
+
+### Documentation
+
+For comprehensive security scanning documentation, see:
+
+- **[SECURITY-SCANNING.md](SECURITY-SCANNING.md)** - Complete scanning guide
+- **[SECURITY-QUICKSTART.md](SECURITY-QUICKSTART.md)** - Quick reference
+
+### Pre-commit Security Checks (Optional)
+
+Enable security scanning in git hooks:
+
+```bash
+# Edit .husky/pre-commit and uncomment the security scan section
+# This will scan for secrets before every commit
+
+# Edit .husky/pre-push and uncomment the security scan section
+# This will scan for vulnerabilities before every push
 ```
 
 ---
@@ -402,9 +522,10 @@ If you discover a security vulnerability in this project, please:
 
 ## Security Audit History
 
-| Date | Auditor | Findings | Status |
-|------|---------|----------|--------|
-| 2026-02-07 | Claude Code Security Review | 5 vulnerabilities (3 HIGH, 2 MEDIUM) | ✅ Fixed |
+| Date       | Auditor                           | Findings                             | Status         |
+| ---------- | --------------------------------- | ------------------------------------ | -------------- |
+| 2026-02-08 | Automated Security Scanning Setup | Trivy + Semgrep integration          | ✅ Implemented |
+| 2026-02-07 | Claude Code Security Review       | 5 vulnerabilities (3 HIGH, 2 MEDIUM) | ✅ Fixed       |
 
 ---
 

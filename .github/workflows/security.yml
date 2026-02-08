@@ -1,0 +1,288 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run security scans daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9'
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+
+jobs:
+  semgrep:
+    name: Semgrep Code Scan
+    runs-on: ubuntu-latest
+    container:
+      image: returntocorp/semgrep
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Semgrep
+        run: |
+          semgrep scan \
+            --config auto \
+            --config p/security-audit \
+            --config p/secrets \
+            --config p/owasp-top-ten \
+            --config p/ci \
+            --sarif \
+            --output semgrep-results.sarif \
+            --error \
+            || true
+
+      - name: Upload Semgrep SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: semgrep-results.sarif
+          category: semgrep
+
+      - name: Generate Semgrep Report
+        if: always()
+        run: |
+          semgrep scan \
+            --config auto \
+            --config p/security-audit \
+            --config p/secrets \
+            --config p/owasp-top-ten \
+            --json \
+            --output semgrep-report.json \
+            || true
+
+      - name: Upload Semgrep JSON Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: semgrep-report
+          path: semgrep-report.json
+          retention-days: 30
+
+  trivy-fs:
+    name: Trivy Filesystem Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Trivy vulnerability scanner (Filesystem)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-fs-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          exit-code: '0'
+
+      - name: Upload Trivy FS SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-fs-results.sarif
+          category: trivy-fs
+
+      - name: Run Trivy JSON report
+        uses: aquasecurity/trivy-action@master
+        if: always()
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'json'
+          output: 'trivy-fs-report.json'
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
+
+      - name: Upload Trivy FS JSON Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-fs-report
+          path: trivy-fs-report.json
+          retention-days: 30
+
+  trivy-config:
+    name: Trivy Config Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy config scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-config-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          exit-code: '0'
+
+      - name: Upload Trivy Config SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-config-results.sarif
+          category: trivy-config
+
+      - name: Run Trivy Config JSON report
+        uses: aquasecurity/trivy-action@master
+        if: always()
+        with:
+          scan-type: 'config'
+          scan-ref: '.'
+          format: 'json'
+          output: 'trivy-config-report.json'
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
+
+      - name: Upload Trivy Config JSON Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-config-report
+          path: trivy-config-report.json
+          retention-days: 30
+
+  trivy-docker:
+    name: Trivy Docker Image Scan
+    runs-on: ubuntu-latest
+    needs: [trivy-fs, trivy-config]
+    if: github.event_name == 'push' || github.event_name == 'schedule'
+    strategy:
+      matrix:
+        app: [landing, assistant, gateway]
+        include:
+          - app: landing
+            dockerfile: apps/landing/Dockerfile
+          - app: assistant
+            dockerfile: apps/assistant/Dockerfile
+          - app: gateway
+            dockerfile: apps/gateway/Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: false
+          load: true
+          tags: openclaw/${{ matrix.app }}:scan
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Trivy vulnerability scanner (Docker)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: openclaw/${{ matrix.app }}:scan
+          format: 'sarif'
+          output: 'trivy-docker-${{ matrix.app }}.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          exit-code: '0'
+
+      - name: Upload Trivy Docker SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-docker-${{ matrix.app }}.sarif
+          category: trivy-docker-${{ matrix.app }}
+
+      - name: Run Trivy Docker JSON report
+        uses: aquasecurity/trivy-action@master
+        if: always()
+        with:
+          image-ref: openclaw/${{ matrix.app }}:scan
+          format: 'json'
+          output: 'trivy-docker-${{ matrix.app }}.json'
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
+
+      - name: Upload Trivy Docker JSON Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-docker-${{ matrix.app }}-report
+          path: trivy-docker-${{ matrix.app }}.json
+          retention-days: 30
+
+  security-summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [semgrep, trivy-fs, trivy-config]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+
+      - name: Generate Security Summary
+        if: always()
+        run: |
+          echo "## Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Scan Status" >> $GITHUB_STEP_SUMMARY
+          echo "- **Semgrep**: ${{ needs.semgrep.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trivy Filesystem**: ${{ needs.trivy-fs.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trivy Config**: ${{ needs.trivy-config.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Reports" >> $GITHUB_STEP_SUMMARY
+          echo "Security scan reports are available in the workflow artifacts." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**View Results:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Go to Security > Code scanning alerts to view SARIF results" >> $GITHUB_STEP_SUMMARY
+          echo "- Download artifacts from this workflow run for detailed JSON reports" >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        continue-on-error: true
+        with:
+          script: |
+            const summary = `## 🔒 Security Scan Results
+
+            | Scanner | Status |
+            |---------|--------|
+            | Semgrep | ${{ needs.semgrep.result }} |
+            | Trivy FS | ${{ needs.trivy-fs.result }} |
+            | Trivy Config | ${{ needs.trivy-config.result }} |
+
+            📊 **Full reports are available in:**
+            - Security > Code scanning alerts (SARIF)
+            - Workflow artifacts (JSON reports)
+
+            *Security scans are automated. Review any findings before merging.*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
