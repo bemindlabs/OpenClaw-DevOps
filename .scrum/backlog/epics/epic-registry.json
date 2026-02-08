@@ -1,0 +1,68 @@
+{
+  "project": "OpenClaw DevOps Platform",
+  "version": "1.0",
+  "updated": "2026-02-08",
+  "next_id": 6,
+  "epics": [
+    {
+      "id": "EPIC-INFRA",
+      "title": "Infrastructure & Deployment",
+      "status": "in_progress",
+      "priority": "critical",
+      "stories": [],
+      "completed_stories": 0,
+      "total_stories": 0,
+      "progress": 0.0,
+      "start_date": "2026-02-08",
+      "target_date": null
+    },
+    {
+      "id": "EPIC-LANDING",
+      "title": "Landing Page",
+      "status": "in_progress",
+      "priority": "high",
+      "stories": [],
+      "completed_stories": 0,
+      "total_stories": 0,
+      "progress": 0.0,
+      "start_date": "2026-02-08",
+      "target_date": null
+    },
+    {
+      "id": "EPIC-GATEWAY",
+      "title": "OpenClaw Gateway",
+      "status": "in_progress",
+      "priority": "critical",
+      "stories": [],
+      "completed_stories": 0,
+      "total_stories": 0,
+      "progress": 0.0,
+      "start_date": "2026-02-08",
+      "target_date": null
+    },
+    {
+      "id": "EPIC-ADMIN",
+      "title": "Admin Dashboard",
+      "status": "in_progress",
+      "priority": "high",
+      "stories": [],
+      "completed_stories": 0,
+      "total_stories": 0,
+      "progress": 0.0,
+      "start_date": "2026-02-08",
+      "target_date": null
+    },
+    {
+      "id": "EPIC-MONITORING",
+      "title": "Monitoring & Observability",
+      "status": "planning",
+      "priority": "high",
+      "stories": [],
+      "completed_stories": 0,
+      "total_stories": 0,
+      "progress": 0.0,
+      "start_date": null,
+      "target_date": null
+    }
+  ]
+}
