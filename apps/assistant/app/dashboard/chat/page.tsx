@@ -6,11 +6,11 @@ import { MessageInput, CommandSuggestions } from '@/components/chat/message-inpu
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Trash2, Send } from 'lucide-react'
+import { Trash2, Send, Bot, Terminal } from 'lucide-react'
 import { useSocket } from '@/hooks/use-socket'
 
 export default function ChatPage() {
-  const { messages, sendMessage, isLoading, error, clearMessages, sessionId } = useChat()
+  const { messages, sendMessage, isLoading, error, clearMessages, sessionId, mode, setMode } = useChat()
   const { connected } = useSocket()
 
   return (
@@ -20,10 +20,34 @@ export default function ChatPage() {
           <div>
             <CardTitle className="text-lg">Chat Interface</CardTitle>
             <CardDescription className="text-xs">
-              Manage services via natural language commands
+              {mode === 'command'
+                ? 'Manage services via natural language commands'
+                : 'Chat with AI assistant powered by LLM'}
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
+            {/* Mode Toggle */}
+            <div className="flex items-center gap-1 bg-muted rounded-md p-0.5">
+              <Button
+                variant={mode === 'command' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setMode('command')}
+                className="h-7 px-2"
+              >
+                <Terminal className="h-3.5 w-3.5 mr-1" />
+                <span className="text-xs">Command</span>
+              </Button>
+              <Button
+                variant={mode === 'assistant' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setMode('assistant')}
+                className="h-7 px-2"
+              >
+                <Bot className="h-3.5 w-3.5 mr-1" />
+                <span className="text-xs">Assistant</span>
+              </Button>
+            </div>
+
             <Badge variant={connected ? 'success' : 'destructive'} className="text-xs">
               {connected ? 'Connected' : 'Disconnected'}
             </Badge>
@@ -52,14 +76,18 @@ export default function ChatPage() {
             <MessageList messages={messages} isLoading={isLoading} />
           </div>
 
-          {/* Command suggestions */}
-          <CommandSuggestions onSelect={sendMessage} />
+          {/* Command suggestions (only in command mode) */}
+          {mode === 'command' && <CommandSuggestions onSelect={sendMessage} />}
 
           {/* Input area */}
           <MessageInput
             onSend={sendMessage}
             disabled={isLoading}
-            placeholder="Type a command (e.g., 'restart nginx', 'status', 'logs mongodb')..."
+            placeholder={
+              mode === 'command'
+                ? "Type a command (e.g., 'restart nginx', 'status', 'logs mongodb')..."
+                : "Ask me anything about OpenClaw or DevOps..."
+            }
           />
         </CardContent>
       </Card>

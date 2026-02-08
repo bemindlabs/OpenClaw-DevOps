@@ -1,6 +1,8 @@
 import { ServiceStatusResponse } from '@/types/service'
 
-const API_BASE = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://localhost:18789'
+// Use relative URLs to hit our Next.js API routes, which proxy to the gateway
+// This works both in development and production, regardless of domain
+const API_BASE = ''
 
 interface ApiResponse<T> {
   success: boolean
@@ -77,15 +79,27 @@ export const apiClient = {
   },
 
   // Send chat message (for Telegram bridge or direct chat)
-  async sendChatMessage(message: string, sessionId?: string) {
+  async sendChatMessage(message: string, sessionId?: string, mode: 'command' | 'assistant' = 'command') {
     return fetchApi<{
       response: string
-      intent: { action: string; service: string; confidence: number }
+      mode?: string
+      provider?: string
+      intent?: { action: string; service: string; confidence: number }
       executedCommand?: string
     }>('/api/chat/message', {
       method: 'POST',
-      body: JSON.stringify({ message, sessionId }),
+      body: JSON.stringify({ message, sessionId, mode }),
     })
+  },
+
+  // Get LLM status
+  async getLLMStatus() {
+    return fetchApi<{
+      provider: string
+      availableProviders: string[]
+      fallbackProviders: string[]
+      activeConversations: number
+    }>('/api/chat/llm/status')
   },
 
   // Get chat history

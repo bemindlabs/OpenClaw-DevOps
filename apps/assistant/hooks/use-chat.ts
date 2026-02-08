@@ -7,17 +7,20 @@ import { useSocket } from './use-socket'
 
 interface UseChatReturn {
   messages: ChatMessage[]
-  sendMessage: (text: string) => Promise<void>
+  sendMessage: (text: string, mode?: 'command' | 'assistant') => Promise<void>
   isLoading: boolean
   error: string | null
   clearMessages: () => void
   sessionId: string
+  mode: 'command' | 'assistant'
+  setMode: (mode: 'command' | 'assistant') => void
 }
 
 export function useChat(): UseChatReturn {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [mode, setMode] = useState<'command' | 'assistant'>('command')
   const sessionIdRef = useRef<string>(generateSessionId())
   const { emit, on, off, connected } = useSocket()
 
@@ -53,8 +56,10 @@ export function useChat(): UseChatReturn {
   }, [on, off])
 
   const sendMessage = useCallback(
-    async (text: string) => {
+    async (text: string, messageMode?: 'command' | 'assistant') => {
       if (!text.trim()) return
+
+      const currentMode = messageMode || mode
 
       setIsLoading(true)
       setError(null)
@@ -73,8 +78,8 @@ export function useChat(): UseChatReturn {
       setMessages((prev) => [...prev, userMessage])
 
       try {
-        // Send via REST API (will be bridged to Telegram or processed directly)
-        const response = await apiClient.sendChatMessage(text, sessionIdRef.current)
+        // Send via REST API with mode
+        const response = await apiClient.sendChatMessage(text, sessionIdRef.current, currentMode)
 
         if (response.success && response.data) {
           const assistantMessage: ChatMessage = {
@@ -102,7 +107,7 @@ export function useChat(): UseChatReturn {
         setIsLoading(false)
       }
     },
-    []
+    [mode]
   )
 
   const clearMessages = useCallback(() => {
@@ -117,5 +122,7 @@ export function useChat(): UseChatReturn {
     error,
     clearMessages,
     sessionId: sessionIdRef.current,
+    mode,
+    setMode,
   }
 }
