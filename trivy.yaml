@@ -52,10 +52,6 @@ scanner:
   - secret
   - misconfig
 
-# Report configuration
-report:
-  format: table
-
 # Database configuration
 db:
   skip-update: false
