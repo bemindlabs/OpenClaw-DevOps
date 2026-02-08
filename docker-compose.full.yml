@@ -103,6 +103,20 @@ services:
       - REDIS_URL=redis://:${REDIS_PASSWORD}@localhost:${REDIS_PORT:-6379}
       - KAFKA_BROKERS=localhost:${KAFKA_PORT:-9092}
       - N8N_WEBHOOK_URL=http://localhost:${N8N_PORT:-5678}
+      # LLM Configuration
+      - LLM_PROVIDER=${LLM_PROVIDER}
+      - LLM_FALLBACK_PROVIDERS=${LLM_FALLBACK_PROVIDERS}
+      - LLM_TEMPERATURE=${LLM_TEMPERATURE}
+      - LLM_MAX_TOKENS=${LLM_MAX_TOKENS}
+      # LLM API Keys
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GOOGLE_AI_API_KEY=${GOOGLE_AI_API_KEY}
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - MOONSHOT_API_KEY=${MOONSHOT_API_KEY}
+      - MOONSHOT_BASE_URL=${MOONSHOT_BASE_URL}
     healthcheck:
       test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://127.0.0.1:18789/health']
       interval: 30s

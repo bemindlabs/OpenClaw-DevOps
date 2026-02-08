@@ -9,3 +9,10 @@ pnpm lint-staged
 # Type check all TypeScript files
 echo "🔧 Type checking..."
 pnpm typecheck
+
+# Optional: Run security scan for secrets and critical issues
+# Uncomment to enable security scanning on every commit
+# echo "🔒 Scanning for secrets and critical vulnerabilities..."
+# if command -v trivy &> /dev/null; then
+#   trivy fs --scanners secret --severity CRITICAL --exit-code 1 .
+# fi

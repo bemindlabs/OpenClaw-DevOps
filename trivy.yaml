@@ -1,0 +1,60 @@
+# Trivy Configuration
+# Documentation: https://aquasecurity.github.io/trivy/latest/docs/references/configuration/config-file/
+
+scan:
+  # Skip files and directories
+  skip-files:
+    - 'node_modules/**'
+    - '**/*.test.ts'
+    - '**/*.test.js'
+    - '**/*.spec.ts'
+    - '**/*.spec.js'
+    - '.next/**'
+    - 'dist/**'
+    - 'build/**'
+    - 'coverage/**'
+    - '.git/**'
+
+  # Skip directories
+  skip-dirs:
+    - 'node_modules'
+    - '.next'
+    - 'dist'
+    - 'build'
+    - 'coverage'
+    - '.git'
+    - '.github'
+    - 'scripts'
+    - 'docs'
+
+vulnerability:
+  # Vulnerability types to detect
+  type:
+    - os
+    - library
+
+  # Severity levels to report
+  severity:
+    - CRITICAL
+    - HIGH
+    - MEDIUM
+    - LOW
+    - UNKNOWN
+
+secret:
+  # Enable secret scanning
+  config: .trivy-secret.yaml
+
+# Scanner configuration
+scanner:
+  # Scanners to use
+  - vuln
+  - secret
+  - misconfig
+
+# Database configuration
+db:
+  skip-update: false
+
+# Timeout settings
+timeout: 10m

@@ -9,16 +9,26 @@ const { v4: uuidv4 } = require('uuid');
 const intentParser = require('../services/intent-parser');
 const dockerManager = require('../services/docker-manager');
 
+console.log('[chat.js] About to require llm-service');
+console.log('[chat.js] require.resolve("../services/llm-service"):', require.resolve('../services/llm-service'));
+const llmService = require('../services/llm-service');
+console.log('[chat.js] llmService required');
+
+console.log('[chat.js] Module loaded');
+console.log('[chat.js] llmService.instanceId at module load:', llmService.instanceId);
+console.log('[chat.js] llmService.clients at module load:', llmService.clients);
+console.log('[chat.js] Object.keys(llmService.clients) at module load:', Object.keys(llmService.clients || {}));
+
 // In-memory chat history (replace with MongoDB in production)
 let chatHistory = [];
 const MAX_HISTORY = 1000;
 
 /**
  * POST /api/chat/message
- * Process a chat message and execute commands
+ * Process a chat message and execute commands or chat with LLM
  */
 router.post('/message', async (req, res) => {
-  const { message, sessionId, userId } = req.body;
+  const { message, sessionId, userId, mode = 'command' } = req.body;
 
   if (!message) {
     return res.status(400).json({
@@ -31,6 +41,39 @@ router.post('/message', async (req, res) => {
   const timestamp = new Date().toISOString();
 
   try {
+    // LLM Assistant Mode
+    if (mode === 'assistant') {
+      const llmResponse = await llmService.chat(message, sessionId || 'default');
+
+      // Save to history
+      const chatMessage = {
+        id: messageId,
+        sessionId: sessionId || 'default',
+        userId: userId || 'anonymous',
+        message,
+        mode: 'assistant',
+        response: llmResponse.response,
+        provider: llmResponse.provider,
+        timestamp
+      };
+
+      chatHistory.push(chatMessage);
+
+      if (chatHistory.length > MAX_HISTORY) {
+        chatHistory = chatHistory.slice(-MAX_HISTORY);
+      }
+
+      return res.json({
+        success: true,
+        id: messageId,
+        response: llmResponse.response,
+        mode: 'assistant',
+        provider: llmResponse.provider,
+        timestamp
+      });
+    }
+
+    // Command Mode (original behavior)
     // Parse intent
     const intent = intentParser.parse(message);
 
@@ -127,6 +170,7 @@ router.post('/message', async (req, res) => {
       sessionId: sessionId || 'default',
       userId: userId || 'anonymous',
       message,
+      mode: 'command',
       intent,
       response,
       executedCommand,
@@ -145,6 +189,7 @@ router.post('/message', async (req, res) => {
       success: true,
       id: messageId,
       response,
+      mode: 'command',
       intent: {
         action: intent.action,
         service: intent.service,
@@ -155,10 +200,12 @@ router.post('/message', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error processing chat message:', error);
+    console.error('[Chat Route] Error processing chat message:', error);
+    console.error('[Chat Route] Error stack:', error.stack);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
+      ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
     });
   }
 });
@@ -194,6 +241,8 @@ router.delete('/history', (req, res) => {
 
   if (sessionId) {
     chatHistory = chatHistory.filter(h => h.sessionId !== sessionId);
+    // Also clear LLM conversation history
+    llmService.clearHistory(sessionId);
   } else {
     chatHistory = [];
   }
@@ -203,6 +252,35 @@ router.delete('/history', (req, res) => {
     message: 'Chat history cleared',
     timestamp: new Date().toISOString()
   });
+});
+
+/**
+ * GET /api/chat/llm/status
+ * Get LLM service status
+ */
+router.get('/llm/status', (req, res) => {
+  try {
+    process.stderr.write(`[${new Date().toISOString()}] /llm/status route CALLED\n`);
+    process.stderr.write(`[${new Date().toISOString()}] llmService.instanceId: ${llmService.instanceId}\n`);
+    process.stderr.write(`[${new Date().toISOString()}] llmService.clients keys: ${Object.keys(llmService.clients || {}).join(', ')}\n`);
+
+    const status = llmService.getStatus();
+    process.stderr.write(`[${new Date().toISOString()}] getStatus() returned instanceId: ${status.instanceId}\n`);
+
+    res.json({
+      success: true,
+      ...status,
+      timestamp: new Date().toISOString(),
+      _route_instanceId: llmService.instanceId,
+      _route_clientsKeys: Object.keys(llmService.clients || {})
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      stack: error.stack
+    });
+  }
 });
 
 /**

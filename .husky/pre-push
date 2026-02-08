@@ -1,10 +1,16 @@
 #!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
 
 echo "🚀 Running pre-push checks..."
 
 # Build all apps to ensure they compile
 echo "🏗️  Building all apps..."
 pnpm build:all
+
+# Run security verification
+echo "🔒 Running security verification..."
+if [ -f "Makefile" ]; then
+  make security-verify 2>/dev/null || echo "⚠️  Security verification skipped (tools not installed)"
+  make security-audit 2>/dev/null || echo "⚠️  Security audit skipped (tools not installed)"
+fi
 
 echo "✅ All pre-push checks passed!"

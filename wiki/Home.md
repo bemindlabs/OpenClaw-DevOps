@@ -2,7 +2,7 @@
 title: OpenClaw DevOps Wiki
 tags: [index, home, documentation]
 created: 2026-02-07
-updated: 2026-02-07
+updated: 2026-02-08
 ---
 
 # OpenClaw DevOps Wiki
@@ -25,7 +25,7 @@ Welcome to the OpenClaw DevOps documentation wiki. This is your central hub for 
 
 ### Deployment
 - [[Local Development]]
-- [[GCE Deployment]]
+- [[GCE Deployment]] → **New: [Complete GCE Guide](deployment/GCE-Deployment-Guide.md)**
 - [[Production Checklist]]
 - [[CI/CD Pipeline]]
 
@@ -163,5 +163,6 @@ cd deployments/gce
 
 ---
 
-*Last Updated: 2026-02-07*
+*Last Updated: 2026-02-08*
 *Maintained by: OpenClaw Team*
+*Latest: GCE deployment completed - All services running on bmt-staging-research*

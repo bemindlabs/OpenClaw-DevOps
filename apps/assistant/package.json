@@ -1,13 +1,13 @@
 {
   "name": "@openclaw/assistant",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "private": true,
   "description": "OpenClaw DevOps Admin Assistant Portal",
   "scripts": {
     "dev": "next dev -p 5555",
     "build": "next build",
     "start": "next start -p 5555",
-    "lint": "next lint",
+    "lint": "eslint",
     "clean": "rm -rf .next node_modules"
   },
   "dependencies": {
