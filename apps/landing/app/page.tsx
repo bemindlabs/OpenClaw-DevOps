@@ -183,7 +183,7 @@ export default function HomePage() {
               <Card className="relative bg-neutral-950 border-neutral-800 p-6">
                 <pre className="text-sm text-neutral-300 overflow-x-auto">
                   <code className="text-primary-400"># Start the platform</code>
-                  {'\n'}<code className="text-neutral-500">$</code> <code className="text-neutral-200">./start-all.sh</code>
+                  {'\n'}<code className="text-neutral-500">$</code> <code className="text-neutral-200">make</code>
                   {'\n\n'}<code className="text-accent-400">✓</code> <code className="text-neutral-400">Nginx running on port 80</code>
                   {'\n'}<code className="text-accent-400">✓</code> <code className="text-neutral-400">Landing page on port 3000</code>
                   {'\n'}<code className="text-accent-400">✓</code> <code className="text-neutral-400">Gateway on port 18789</code>
