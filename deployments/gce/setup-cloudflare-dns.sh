@@ -64,6 +64,7 @@ echo ""
 echo "Subdomains to configure:"
 echo "  - $LANDING_DOMAIN → $EXTERNAL_IP"
 echo "  - $GATEWAY_DOMAIN → $EXTERNAL_IP"
+echo "  - $PORTAINER_DOMAIN → $EXTERNAL_IP"
 echo ""
 
 # Function to create or update DNS record
@@ -163,6 +164,7 @@ echo ""
 
 create_dns_record "$LANDING_DOMAIN" "$EXTERNAL_IP"
 create_dns_record "$GATEWAY_DOMAIN" "$EXTERNAL_IP"
+create_dns_record "$PORTAINER_DOMAIN" "$EXTERNAL_IP"
 
 # Set SSL mode
 set_ssl_mode
@@ -171,7 +173,7 @@ set_ssl_mode
 echo -e "${BLUE}Verifying DNS Records...${NC}"
 echo ""
 
-for domain in "$LANDING_DOMAIN" "$GATEWAY_DOMAIN"; do
+for domain in "$LANDING_DOMAIN" "$GATEWAY_DOMAIN" "$PORTAINER_DOMAIN"; do
     echo -e "Checking ${YELLOW}$domain${NC}..."
 
     dns_check=$(dig +short $domain @1.1.1.1 | head -n 1)
@@ -198,12 +200,14 @@ echo ""
 echo "Your domains are now configured:"
 echo "  • $LANDING_DOMAIN"
 echo "  • $GATEWAY_DOMAIN"
+echo "  • $PORTAINER_DOMAIN"
 echo ""
 echo "SSL Mode: Flexible (HTTPS to Cloudflare, HTTP to origin)"
 echo "Proxy Status: Enabled (orange cloud)"
 echo ""
 echo "Test your deployments:"
-echo "  Landing:  https://$LANDING_DOMAIN"
-echo "  Gateway:  https://$GATEWAY_DOMAIN"
+echo "  Landing:    https://$LANDING_DOMAIN"
+echo "  Gateway:    https://$GATEWAY_DOMAIN"
+echo "  Portainer:  https://$PORTAINER_DOMAIN"
 echo ""
 echo -e "${YELLOW}Note: DNS propagation can take 1-5 minutes${NC}"
