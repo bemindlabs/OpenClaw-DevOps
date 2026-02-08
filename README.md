@@ -2,6 +2,19 @@
 
 [![Status](https://img.shields.io/badge/Status-Under%20Development-yellow)](https://github.com/bemindlabs/OpenClaw-DevOps)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org)
+[![React](https://img.shields.io/badge/React-19-61dafb?logo=react)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript)](https://www.typescriptlang.org)
+[![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=node.js)](https://nodejs.org)
+[![Express](https://img.shields.io/badge/Express-4-000000?logo=express)](https://expressjs.com)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ed?logo=docker)](https://www.docker.com)
+[![pnpm](https://img.shields.io/badge/pnpm-9-f69220?logo=pnpm)](https://pnpm.io)
+[![MongoDB](https://img.shields.io/badge/MongoDB-7-47a248?logo=mongodb)](https://www.mongodb.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql)](https://www.postgresql.org)
+[![Redis](https://img.shields.io/badge/Redis-7-dc382d?logo=redis)](https://redis.io)
+[![Nginx](https://img.shields.io/badge/Nginx-Proxy-009639?logo=nginx)](https://nginx.org)
+[![Prometheus](https://img.shields.io/badge/Prometheus-Monitoring-e6522c?logo=prometheus)](https://prometheus.io)
+[![Security](https://img.shields.io/badge/Security-Trivy%20%2B%20Semgrep-success?logo=security)](SECURITY-SCANNING.md)
 
 > **⚠️ Project Status: Under Active Development**
 >
