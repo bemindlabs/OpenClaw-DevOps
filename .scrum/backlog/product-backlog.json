@@ -1,0 +1,49 @@
+{
+  "project": "OpenClaw DevOps Platform",
+  "version": "1.0",
+  "updated": "2026-02-08",
+  "next_id": 1,
+  "epics": [
+    {
+      "id": "EPIC-INFRA",
+      "title": "Infrastructure & Deployment",
+      "description": "Infrastructure setup, deployment automation, and monitoring",
+      "status": "in_progress",
+      "priority": "critical",
+      "phase": "MVP"
+    },
+    {
+      "id": "EPIC-LANDING",
+      "title": "Landing Page",
+      "description": "Main landing page with features, pricing, and marketing content",
+      "status": "in_progress",
+      "priority": "high",
+      "phase": "MVP"
+    },
+    {
+      "id": "EPIC-GATEWAY",
+      "title": "OpenClaw Gateway",
+      "description": "AI gateway service for multi-provider LLM routing",
+      "status": "in_progress",
+      "priority": "critical",
+      "phase": "MVP"
+    },
+    {
+      "id": "EPIC-ADMIN",
+      "title": "Admin Dashboard",
+      "description": "Admin portal for managing services via chat interface",
+      "status": "in_progress",
+      "priority": "high",
+      "phase": "MVP"
+    },
+    {
+      "id": "EPIC-MONITORING",
+      "title": "Monitoring & Observability",
+      "description": "Prometheus, Grafana, and logging infrastructure",
+      "status": "planning",
+      "priority": "high",
+      "phase": "Post-MVP"
+    }
+  ],
+  "items": []
+}
