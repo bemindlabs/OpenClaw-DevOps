@@ -9,60 +9,77 @@
       "title": "Infrastructure & Deployment",
       "status": "in_progress",
       "priority": "critical",
-      "stories": [],
+      "stories": ["US-001", "US-002", "US-003", "US-004", "US-005"],
       "completed_stories": 0,
-      "total_stories": 0,
+      "total_stories": 5,
+      "total_points": 24,
+      "completed_points": 0,
       "progress": 0.0,
       "start_date": "2026-02-08",
-      "target_date": null
+      "target_date": "2026-03-15"
     },
     {
       "id": "EPIC-LANDING",
       "title": "Landing Page",
       "status": "in_progress",
       "priority": "high",
-      "stories": [],
+      "stories": ["US-006", "US-007", "US-008", "US-009"],
       "completed_stories": 0,
-      "total_stories": 0,
+      "total_stories": 4,
+      "total_points": 16,
+      "completed_points": 0,
       "progress": 0.0,
       "start_date": "2026-02-08",
-      "target_date": null
+      "target_date": "2026-03-01"
     },
     {
       "id": "EPIC-GATEWAY",
       "title": "OpenClaw Gateway",
       "status": "in_progress",
       "priority": "critical",
-      "stories": [],
+      "stories": ["US-010", "US-011", "US-012", "US-013", "US-014"],
       "completed_stories": 0,
-      "total_stories": 0,
+      "total_stories": 5,
+      "total_points": 31,
+      "completed_points": 0,
       "progress": 0.0,
       "start_date": "2026-02-08",
-      "target_date": null
+      "target_date": "2026-03-22"
     },
     {
       "id": "EPIC-ADMIN",
       "title": "Admin Dashboard",
       "status": "in_progress",
       "priority": "high",
-      "stories": [],
+      "stories": ["US-015", "US-016", "US-017", "US-018"],
       "completed_stories": 0,
-      "total_stories": 0,
+      "total_stories": 4,
+      "total_points": 23,
+      "completed_points": 0,
       "progress": 0.0,
       "start_date": "2026-02-08",
-      "target_date": null
+      "target_date": "2026-03-29"
     },
     {
       "id": "EPIC-MONITORING",
       "title": "Monitoring & Observability",
       "status": "planning",
       "priority": "high",
-      "stories": [],
+      "stories": ["US-019", "US-020"],
       "completed_stories": 0,
-      "total_stories": 0,
+      "total_stories": 2,
+      "total_points": 13,
+      "completed_points": 0,
       "progress": 0.0,
-      "start_date": null,
-      "target_date": null
+      "start_date": "2026-03-01",
+      "target_date": "2026-04-15"
     }
-  ]
+  ],
+  "summary": {
+    "total_epics": 5,
+    "total_stories": 20,
+    "total_points": 107,
+    "completed_points": 0,
+    "overall_progress": 0.0
+  }
 }
