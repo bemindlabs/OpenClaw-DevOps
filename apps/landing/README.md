@@ -27,7 +27,7 @@ The easiest way to run the landing page with all OpenClaw services:
 
 ```bash
 # From project root (/Users/lps/server/)
-./start-all.sh
+make
 
 # This will:
 # 1. Build all Docker images (landing, assistant, gateway, nginx)
@@ -80,7 +80,7 @@ pnpm lint
 
 ```bash
 # From project root
-./start-all.sh
+make
 ```
 
 This handles building, starting, and health checking all services.

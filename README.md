@@ -1,6 +1,33 @@
 # OpenClaw DevOps
 
-Full-stack OpenClaw DevOps platform with Next.js landing page, Nginx reverse proxy, AI gateway, databases, messaging, and monitoring infrastructure.
+Full-stack OpenClaw DevOps platform with Next.js landing page, AI-powered gateway, admin portal, databases, messaging, and monitoring infrastructure.
+
+**✨ New Features:**
+- 🤖 **Multi-Provider LLM Chat** - OpenAI, Anthropic, Google AI, Moonshot support
+- 💬 **AI Assistant** - Built-in chat interface with command & assistant modes
+- 🔄 **Automatic Fallback** - Seamless provider switching on failures
+- 📊 **Real-time Monitoring** - Prometheus & Grafana dashboards
+- 🔐 **Secure by Default** - OAuth authentication, rate limiting, health checks
+
+## ✅ Current Status
+
+**Working Services:**
+- ✅ Landing Page (http://localhost:3000)
+- ✅ Assistant Portal (http://localhost:5555) - **NEW!**
+- ✅ Gateway API (http://localhost:18789)
+- ✅ MongoDB Database
+- ✅ PostgreSQL Database
+- ✅ Redis Cache
+- ✅ Prometheus Monitoring
+- ✅ cAdvisor Metrics
+
+**AI/LLM Features:**
+- ✅ OpenAI Integration (GPT-4o)
+- ⚠️ Anthropic (no credits)
+- ⚠️ Google AI (configuration needed)
+- ⚠️ Moonshot (authentication issue)
+
+**Health Score: 67%** (8/12 services operational)
 
 ## 🏗️ Architecture
 
@@ -9,13 +36,39 @@ Internet
     ↓
 DNS
     ├─ your-domain.com → Landing Page (Next.js)
-    ├─ openclaw.your-domain.com → Gateway (OpenClaw)
-    └─ assistant.your-domain.com → Admin Portal
+    ├─ openclaw.your-domain.com → Gateway (OpenClaw AI)
+    └─ assistant.your-domain.com → Admin Portal (AI Chat)
     ↓
-Nginx (Port 80/443)
+Nginx (Port 80/443) - Optional Reverse Proxy
     ├─ / → Landing (Port 3000)
     ├─ openclaw. → Gateway (Port 18789)
     └─ assistant. → Admin Portal (Port 5555)
+
+Gateway (Port 18789)
+    ├─ REST API (chat, health, docker)
+    ├─ WebSocket Support
+    ├─ LLM Service (Multi-Provider)
+    │   ├─ OpenAI (Primary)
+    │   ├─ Anthropic (Fallback)
+    │   ├─ Google AI (Fallback)
+    │   └─ Moonshot (Fallback)
+    └─ Service Orchestration
+
+Assistant Portal (Port 5555)
+    ├─ Next.js 16 App Router
+    ├─ Google OAuth Authentication
+    ├─ AI Chat Interface (Command & Assistant modes)
+    └─ Admin Dashboard
+
+Databases
+    ├─ MongoDB (Port 27017) - Document Store
+    ├─ PostgreSQL (Port 5432) - Relational DB
+    └─ Redis (Port 6379) - Cache & Sessions
+
+Monitoring
+    ├─ Prometheus (Port 9090) - Metrics Collection
+    ├─ Grafana (Port 3001) - Dashboards (optional)
+    └─ cAdvisor (Port 8080) - Container Metrics
 ```
 
 ## 📁 Project Structure
@@ -46,38 +99,63 @@ Nginx (Port 80/443)
 
 ## 🚀 Quick Start
 
-### Complete Setup (Recommended for First Time)
+### Prerequisites
+
+- Docker & Docker Compose
+- pnpm (for development mode)
+- 8GB+ RAM recommended
+- 10GB+ free disk space
+
+### Option 1: Docker (Production Mode - Recommended)
 
 ```bash
-# 1. Initial setup (installs pnpm, creates .env)
-make setup
+# 1. Clone the repository
+git clone https://github.com/bemindlabs/OpenClaw-DevOps.git
+cd OpenClaw-DevOps
 
-# 2. Generate secure passwords and tokens
-make security-setup
+# 2. Setup environment (creates .env from example)
+cp .env.example .env
 
-# 3. Edit .env with your domains
-nano .env  # or vim, code, etc.
+# 3. Add your API keys to .env
+nano .env  # Add OPENAI_API_KEY, etc.
 
-# 4. Install dependencies
-make install
+# 4. Start all services with make
+make
 
-# 5. Build Docker images
-make build
+# This will:
+# - Build all Docker images
+# - Start containers (gateway, databases, monitoring)
+# - Verify health checks
+# - Show service URLs
 
-# 6. Start all services
-make start
-
-# 7. Check status
-make health
+# 5. Access services
+# Landing: http://localhost:3000
+# Assistant: http://localhost:5555
+# Gateway: http://localhost:18789
 ```
 
-### Quick Start (Automated)
+### Option 2: Development Mode (Hot Reload)
 
 ```bash
-# One-command setup (interactive)
-make onboard
+# 1. Install dependencies
+pnpm install
 
-# Or use the quick start script
+# 2. Start services
+pnpm dev:landing      # http://localhost:3000
+pnpm dev:assistant    # http://localhost:5555
+pnpm dev:gateway      # http://localhost:18789
+
+# Or start all in one command
+make dev
+```
+
+### Option 3: Quick Start Script
+
+```bash
+# Automated setup with interactive prompts
+make
+
+# Or use the traditional script
 ./start-all.sh
 ```
 
@@ -177,6 +255,101 @@ npm run dev
 - Grafana (3001) - Dashboards
 - Exporters - Node, cAdvisor, Redis, PostgreSQL, MongoDB
 
+## 🤖 AI/LLM Features
+
+### Multi-Provider LLM Support
+
+The gateway includes a sophisticated LLM service with automatic fallback support:
+
+**Supported Providers:**
+- ✅ **OpenAI** (GPT-4, GPT-4o, GPT-3.5) - Primary provider
+- ✅ **Anthropic** (Claude 3.5 Sonnet, Claude 3 Opus)
+- ✅ **Google AI** (Gemini Pro, Gemini Flash)
+- ✅ **Moonshot/Kimi** (Chinese LLM with OpenAI-compatible API)
+
+**Features:**
+- **Automatic Fallback** - If primary provider fails, automatically tries alternative providers
+- **Session Management** - Maintains conversation history per session (last 20 messages)
+- **Provider Selection** - Configure primary and fallback providers via environment variables
+- **Model Routing** - Route different tasks to different models (chat, completion, code, reasoning)
+
+### Chat API
+
+**Endpoint:** `POST http://localhost:18789/api/chat/message`
+
+**Request:**
+```json
+{
+  "message": "Your message here",
+  "mode": "assistant",
+  "sessionId": "optional-session-id"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "response": "AI response here",
+  "provider": "openai",
+  "sessionId": "session-id",
+  "id": "message-id",
+  "timestamp": "2026-02-08T02:00:00.000Z"
+}
+```
+
+**Example:**
+```bash
+curl -X POST http://localhost:18789/api/chat/message \
+  -H "Content-Type: application/json" \
+  -d '{"message":"Hello, how can you help?","mode":"assistant"}'
+```
+
+### Assistant Portal
+
+Access the AI-powered admin portal at **http://localhost:5555**
+
+**Features:**
+- 💬 Dual-mode chat interface (Command mode & Assistant mode)
+- 🔐 Google OAuth authentication
+- 📊 Real-time service monitoring
+- 🎨 Modern dark theme UI with shadcn/ui components
+- 🔄 Proxy to gateway for secure API access
+
+### Configuration
+
+Add your API keys to `.env`:
+
+```bash
+# OpenAI (Primary)
+OPENAI_API_KEY=sk-proj-your-key-here
+
+# Anthropic (Fallback)
+ANTHROPIC_API_KEY=sk-ant-your-key-here
+
+# Google AI (Fallback)
+GOOGLE_AI_API_KEY=AIza-your-key-here
+
+# Moonshot/Kimi (Optional)
+MOONSHOT_API_KEY=sk-kimi-your-key-here
+
+# Provider Configuration
+LLM_PROVIDER=openai
+LLM_FALLBACK_PROVIDERS=anthropic,google,moonshot
+```
+
+### Model Configuration
+
+Route different tasks to optimal models:
+
+```bash
+LLM_CHAT_MODEL=openai/gpt-4o
+LLM_COMPLETION_MODEL=anthropic/claude-3-5-sonnet-20241022
+LLM_EMBEDDING_MODEL=openai/text-embedding-3-small
+LLM_CODE_MODEL=openai/gpt-4o
+LLM_REASONING_MODEL=anthropic/claude-3-5-sonnet-20241022
+```
+
 ## 🐋 Docker Commands
 
 ```bash
@@ -207,15 +380,47 @@ docker image prune -a
 
 ## 📊 Health Checks
 
-```bash
-# Basic services
-curl http://localhost/health        # Nginx
-curl http://localhost:3000          # Landing
-curl http://localhost:18789         # Gateway
+### Quick Health Check
 
-# Full stack
-curl http://localhost:9090/-/healthy # Prometheus
-curl http://localhost:3001/api/health # Grafana
+```bash
+# Check all core services
+make health
+```
+
+### Manual Service Checks
+
+```bash
+# Core Services
+curl http://localhost:3000                    # Landing (Next.js)
+curl http://localhost:5555                    # Assistant Portal
+curl http://localhost:18789/health | jq .    # Gateway Health
+
+# Databases
+docker exec openclaw-mongodb mongosh --quiet --eval "db.adminCommand('ping')"
+docker exec openclaw-postgres pg_isready -U postgres_admin
+docker exec openclaw-redis redis-cli -a "${REDIS_PASSWORD}" ping
+
+# Monitoring
+curl http://localhost:9090/-/healthy         # Prometheus
+docker exec openclaw-cadvisor wget -qO- http://localhost:8080/healthz
+
+# AI/LLM Chat
+curl -X POST http://localhost:18789/api/chat/message \
+  -H "Content-Type: application/json" \
+  -d '{"message":"Hello","mode":"assistant"}' | jq .
+```
+
+### Service Status Dashboard
+
+```bash
+# View all running containers
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+# Check container health
+docker ps --filter "health=healthy"
+
+# View resource usage
+docker stats --no-stream
 ```
 
 ## 📝 Configuration
@@ -352,6 +557,64 @@ Health checks have a 40-second start period. If showing "unhealthy":
    ```bash
    docker exec <container> wget --quiet --tries=1 --spider http://localhost:<port>
    ```
+
+### AI/LLM Chat Issues
+
+#### "All LLM providers failed"
+
+```bash
+# 1. Check API keys are set in .env
+grep "API_KEY" .env | grep -v "CHANGE_ME"
+
+# 2. Check gateway logs for specific provider errors
+docker-compose logs gateway | grep "LLM\|Error with provider"
+
+# 3. Test individual providers
+curl -X POST http://localhost:18789/api/chat/message \
+  -H "Content-Type: application/json" \
+  -d '{"message":"test","mode":"assistant"}' | jq .
+
+# Common fixes:
+# - OpenAI: Remove or empty OPENAI_ORG_ID if not using organization
+# - Anthropic: Add credits to account (https://console.anthropic.com/settings/billing)
+# - Google: Use correct model name (gemini-1.5-flash, not gemini-flash-latest)
+# - Moonshot: Verify API key is valid
+```
+
+#### Assistant Portal Not Accessible (http://localhost:5555)
+
+```bash
+# 1. Check if container is running
+docker ps | grep assistant
+
+# 2. Verify port mapping
+docker port openclaw-assistant
+
+# 3. Restart with port mapping
+docker-compose down assistant
+docker-compose up -d assistant
+
+# 4. Check logs
+docker-compose logs assistant
+
+# 5. Wait for health check (can take 40 seconds)
+docker ps --filter "name=assistant"
+```
+
+#### "fetch failed" in Assistant
+
+This usually means the assistant can't reach the gateway:
+
+```bash
+# 1. Verify gateway is accessible from assistant container
+docker exec openclaw-assistant wget -qO- http://host.docker.internal:18789/health
+
+# 2. If running in dev mode (not Docker), use localhost instead
+# The route.ts auto-detects Docker vs host environment
+
+# 3. Check GATEWAY_URL environment variable
+docker exec openclaw-assistant printenv | grep GATEWAY
+```
 
 ## 🔐 Security
 
