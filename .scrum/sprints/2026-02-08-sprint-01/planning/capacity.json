@@ -1,0 +1,114 @@
+{
+  "sprint_id": "2026-02-08-sprint-01",
+  "sprint_name": "Foundation & Core Infrastructure",
+  "start_date": "2026-02-08",
+  "end_date": "2026-02-21",
+  "working_days": 10,
+  "team": {
+    "members": [
+      {
+        "name": "TBD - Backend Developer 1",
+        "role": "backend",
+        "availability": 1.0,
+        "velocity": 8,
+        "skills": ["nodejs", "typescript", "express", "mongodb"]
+      },
+      {
+        "name": "TBD - Backend Developer 2",
+        "role": "backend",
+        "availability": 1.0,
+        "velocity": 8,
+        "skills": ["nodejs", "websocket", "redis", "kafka"]
+      },
+      {
+        "name": "TBD - Frontend Developer 1",
+        "role": "frontend",
+        "availability": 1.0,
+        "velocity": 8,
+        "skills": ["react", "nextjs", "typescript", "tailwind"]
+      },
+      {
+        "name": "TBD - Frontend Developer 2",
+        "role": "frontend",
+        "availability": 1.0,
+        "velocity": 8,
+        "skills": ["react", "nextjs", "typescript", "shadcn"]
+      },
+      {
+        "name": "TBD - DevOps Engineer",
+        "role": "devops",
+        "availability": 1.0,
+        "velocity": 10,
+        "skills": ["docker", "nginx", "github-actions", "gce", "prometheus"]
+      },
+      {
+        "name": "TBD - Tech Lead",
+        "role": "lead",
+        "availability": 0.5,
+        "velocity": 4,
+        "skills": ["architecture", "review", "planning"]
+      }
+    ],
+    "total_members": 6
+  },
+  "capacity": {
+    "total_velocity": 50,
+    "committed_points": 48,
+    "buffer_points": 2,
+    "utilization": 0.96
+  },
+  "allocation": {
+    "by_role": {
+      "backend": {
+        "members": 2,
+        "points": 16,
+        "stories": ["US-010", "US-011"]
+      },
+      "frontend": {
+        "members": 2,
+        "points": 13,
+        "stories": ["US-006", "US-007", "US-015"]
+      },
+      "devops": {
+        "members": 1,
+        "points": 19,
+        "stories": ["US-001", "US-002", "US-003", "US-004"]
+      }
+    },
+    "by_epic": {
+      "EPIC-INFRA": {
+        "points": 19,
+        "percentage": 39.6
+      },
+      "EPIC-LANDING": {
+        "points": 8,
+        "percentage": 16.7
+      },
+      "EPIC-GATEWAY": {
+        "points": 16,
+        "percentage": 33.3
+      },
+      "EPIC-ADMIN": {
+        "points": 5,
+        "percentage": 10.4
+      }
+    }
+  },
+  "schedule": {
+    "week_1": {
+      "focus": "Infrastructure foundation",
+      "target_points": 24,
+      "stories": ["US-001", "US-002", "US-003", "US-010", "US-006"]
+    },
+    "week_2": {
+      "focus": "Integration and polish",
+      "target_points": 24,
+      "stories": ["US-004", "US-011", "US-007", "US-015"]
+    }
+  },
+  "contingency": {
+    "buffer_stories": ["US-008", "US-009"],
+    "stretch_stories": ["US-005"],
+    "spillover_capacity": 10
+  }
+}

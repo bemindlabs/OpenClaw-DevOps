@@ -1,0 +1,146 @@
+{
+  "sprint_id": "2026-02-08-sprint-01",
+  "sprint_name": "Foundation & Core Infrastructure",
+  "created": "2026-02-08",
+  "updated": "2026-02-08",
+  "stories": [
+    {
+      "id": "US-001",
+      "epic_id": "EPIC-INFRA",
+      "title": "Docker Compose Basic Stack",
+      "priority": "critical",
+      "story_points": 5,
+      "status": "ready",
+      "assignee": null,
+      "order": 1,
+      "dependencies": [],
+      "blockers": [],
+      "tags": ["infrastructure", "docker", "mvp"]
+    },
+    {
+      "id": "US-002",
+      "epic_id": "EPIC-INFRA",
+      "title": "Nginx Reverse Proxy Setup",
+      "priority": "critical",
+      "story_points": 3,
+      "status": "ready",
+      "assignee": null,
+      "order": 2,
+      "dependencies": ["US-001"],
+      "blockers": [],
+      "tags": ["infrastructure", "nginx", "mvp"]
+    },
+    {
+      "id": "US-003",
+      "epic_id": "EPIC-INFRA",
+      "title": "SSL/TLS Configuration",
+      "priority": "high",
+      "story_points": 3,
+      "status": "ready",
+      "assignee": null,
+      "order": 3,
+      "dependencies": ["US-002"],
+      "blockers": [],
+      "tags": ["infrastructure", "security", "ssl", "mvp"]
+    },
+    {
+      "id": "US-004",
+      "epic_id": "EPIC-INFRA",
+      "title": "CI/CD Pipeline with GitHub Actions",
+      "priority": "high",
+      "story_points": 8,
+      "status": "ready",
+      "assignee": null,
+      "order": 4,
+      "dependencies": ["US-003"],
+      "blockers": [],
+      "tags": ["infrastructure", "ci-cd", "github-actions", "mvp"]
+    },
+    {
+      "id": "US-006",
+      "epic_id": "EPIC-LANDING",
+      "title": "Hero Section with CTA",
+      "priority": "high",
+      "story_points": 3,
+      "status": "ready",
+      "assignee": null,
+      "order": 5,
+      "dependencies": [],
+      "blockers": [],
+      "tags": ["frontend", "landing", "mvp"]
+    },
+    {
+      "id": "US-007",
+      "epic_id": "EPIC-LANDING",
+      "title": "Features Grid Component",
+      "priority": "high",
+      "story_points": 5,
+      "status": "ready",
+      "assignee": null,
+      "order": 6,
+      "dependencies": ["US-006"],
+      "blockers": [],
+      "tags": ["frontend", "landing", "mvp"]
+    },
+    {
+      "id": "US-010",
+      "epic_id": "EPIC-GATEWAY",
+      "title": "LLM Provider Abstraction Layer",
+      "priority": "critical",
+      "story_points": 8,
+      "status": "ready",
+      "assignee": null,
+      "order": 7,
+      "dependencies": [],
+      "blockers": [],
+      "tags": ["backend", "gateway", "llm", "mvp"]
+    },
+    {
+      "id": "US-011",
+      "epic_id": "EPIC-GATEWAY",
+      "title": "Request Routing & Failover",
+      "priority": "critical",
+      "story_points": 8,
+      "status": "ready",
+      "assignee": null,
+      "order": 8,
+      "dependencies": ["US-010"],
+      "blockers": [],
+      "tags": ["backend", "gateway", "routing", "mvp"]
+    },
+    {
+      "id": "US-015",
+      "epic_id": "EPIC-ADMIN",
+      "title": "Google OAuth Integration",
+      "priority": "critical",
+      "story_points": 5,
+      "status": "ready",
+      "assignee": null,
+      "order": 9,
+      "dependencies": [],
+      "blockers": [],
+      "tags": ["frontend", "auth", "oauth", "mvp"]
+    }
+  ],
+  "summary": {
+    "total_stories": 9,
+    "total_points": 48,
+    "by_status": {
+      "ready": 9,
+      "in_progress": 0,
+      "review": 0,
+      "done": 0
+    },
+    "by_priority": {
+      "critical": 5,
+      "high": 4,
+      "medium": 0
+    },
+    "by_epic": {
+      "EPIC-INFRA": 4,
+      "EPIC-LANDING": 2,
+      "EPIC-GATEWAY": 2,
+      "EPIC-ADMIN": 1
+    }
+  }
+}
