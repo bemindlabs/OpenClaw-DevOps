@@ -634,6 +634,262 @@ Critical environment variables in `.env`:
 - NextAuth secret
 - Service ports
 
+## Git Operations - Strict Mode
+
+**⚠️ STRICT MODE ENABLED**
+
+Before committing or pushing ANY changes, you MUST:
+
+### Pre-Commit Requirements
+
+1. **Build Verification**
+
+   ```bash
+   # MUST pass before committing
+   pnpm build:all
+   ```
+
+   - If build fails: Fix errors before committing
+   - Do NOT use `--no-verify` unless explicitly authorized
+   - Do NOT bypass build failures
+
+2. **Type Checking**
+
+   ```bash
+   # MUST pass before committing
+   pnpm typecheck
+   ```
+
+   - Fix all TypeScript errors
+   - Do NOT commit with type errors
+   - Do NOT use `any` to bypass types
+
+3. **Linting**
+   ```bash
+   # MUST pass before committing
+   pnpm lint:all
+   ```
+
+   - Fix all linting errors
+   - Apply auto-fixes where possible: `pnpm lint:all --fix`
+   - Do NOT ignore linting rules without justification
+
+### Pre-Push Requirements
+
+**CRITICAL: Do NOT push if ANY of these checks fail**
+
+1. **Full Build Check**
+
+   ```bash
+   # All apps must build successfully
+   pnpm build:all
+   ```
+
+2. **Test Suite** (if tests exist)
+
+   ```bash
+   pnpm test
+   ```
+
+3. **Security Scan** (for production branches)
+
+   ```bash
+   make security-scan
+   ```
+
+4. **Working Tree Check**
+   ```bash
+   # Ensure no uncommitted changes
+   git status
+   ```
+
+### Strict Mode Rules
+
+**DO:**
+
+- ✅ Always run builds before committing
+- ✅ Fix TypeScript errors immediately
+- ✅ Test changes locally before pushing
+- ✅ Review all changes with `git diff`
+- ✅ Write descriptive commit messages
+- ✅ Use conventional commit format (feat:, fix:, docs:, etc.)
+- ✅ Include Co-Authored-By line in commits
+
+**DO NOT:**
+
+- ❌ Push with build failures
+- ❌ Push with TypeScript errors
+- ❌ Push with test failures
+- ❌ Use `--no-verify` without explicit permission
+- ❌ Force push to main/master branches
+- ❌ Commit sensitive data (.env, secrets, API keys)
+- ❌ Push directly to protected branches
+
+### Bypass Authorization
+
+Use `--no-verify` ONLY when:
+
+1. Pre-commit hooks are blocking a legitimate commit
+2. TypeScript errors are in external dependencies
+3. User explicitly requests bypassing checks
+4. Emergency hotfix is required
+
+**Always document why you're bypassing checks in the commit message.**
+
+### Error Handling Workflow
+
+**If build fails:**
+
+```bash
+# 1. View the error
+pnpm build:all
+
+# 2. Fix the issue in the relevant app
+cd apps/[app-name]
+# Fix the error
+
+# 3. Verify fix
+pnpm build
+
+# 4. Return to root and build all
+cd ../..
+pnpm build:all
+
+# 5. Then commit
+git add .
+git commit -m "fix: resolve build error in [app-name]"
+```
+
+**If TypeScript fails:**
+
+```bash
+# 1. Run type check to see all errors
+pnpm typecheck
+
+# 2. Fix type errors
+# Edit the files with errors
+
+# 3. Verify fixes
+pnpm typecheck
+
+# 4. Then commit
+git commit -m "fix: resolve TypeScript errors"
+```
+
+**If tests fail:**
+
+```bash
+# 1. Run tests to identify failures
+pnpm test
+
+# 2. Fix failing tests or code
+# Edit test or source files
+
+# 3. Verify fixes
+pnpm test
+
+# 4. Then commit
+git commit -m "fix: resolve test failures"
+```
+
+### Push Verification Process
+
+**Before EVERY push, verify:**
+
+```bash
+# 1. Check current branch
+git branch --show-current
+
+# 2. Check for uncommitted changes
+git status
+
+# 3. Run full build
+pnpm build:all
+
+# 4. Check for TypeScript errors
+pnpm typecheck
+
+# 5. Only if ALL pass, then push
+git push
+```
+
+### Commit Message Format
+
+**Required format:**
+
+```
+<type>: <description>
+
+[optional body]
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+```
+
+**Types:**
+
+- `feat:` - New feature
+- `fix:` - Bug fix
+- `docs:` - Documentation changes
+- `chore:` - Maintenance tasks
+- `refactor:` - Code refactoring
+- `test:` - Test changes
+- `ci:` - CI/CD changes
+- `perf:` - Performance improvements
+
+**Examples:**
+
+```bash
+git commit -m "feat: add user authentication to assistant portal
+
+- Implement Google OAuth integration
+- Add role-based access control
+- Configure session management
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+```
+
+### Protected Branches
+
+**Never force push to:**
+
+- `main`
+- `master`
+- `production`
+- `develop`
+
+**Ask user before:**
+
+- Pushing to any branch for the first time
+- Force pushing anywhere
+- Deleting branches
+- Merging into protected branches
+
+### Issue Detection
+
+**If you encounter ANY of these, STOP and report:**
+
+- Build failures
+- TypeScript errors (except in dependencies)
+- Test failures
+- Linting errors
+- Security vulnerabilities
+- Merge conflicts
+- Missing dependencies
+
+**Report format:**
+
+```
+⚠️ STRICT MODE: Cannot proceed with commit/push
+
+Issue detected: [description]
+Location: [file:line]
+Error: [error message]
+
+Required action: [what needs to be fixed]
+
+Awaiting user guidance before proceeding.
+```
+
 ## Documentation Standards
 
 ### docs/ Directory Structure
@@ -1024,4 +1280,5 @@ mv docs/OLD-GUIDE.md docs/backup/OLD-GUIDE.md
 
 _Project: OpenClaw DevOps_
 _Location: /Users/lps/server_
-_Updated: 2026-02-07_
+_Updated: 2026-02-08_
+_**Strict Mode:** ENABLED - All commits/pushes require passing builds and tests_

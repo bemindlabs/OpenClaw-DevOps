@@ -7,7 +7,7 @@
     "dev": "next dev -p 5555",
     "build": "next build",
     "start": "next start -p 5555",
-    "lint": "next lint",
+    "lint": "eslint",
     "clean": "rm -rf .next node_modules"
   },
   "dependencies": {
@@ -34,7 +34,6 @@
     "@tanstack/react-virtual": "^3.0.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.0.0",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^20.0.0",
     "@types/react": "^19.0.0",
