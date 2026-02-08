@@ -3,7 +3,14 @@
  * AI Agent Platform Gateway Service with Docker Management
  */
 
-require('dotenv').config();
+// Commented out dotenv - using Docker environment variables instead
+// require('dotenv').config();
+
+// DEBUG: Log environment variables at startup
+console.log('[STARTUP DEBUG] OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? `EXISTS (${process.env.OPENAI_API_KEY.substring(0,10)}...)` : 'MISSING');
+console.log('[STARTUP DEBUG] LLM_PROVIDER:', process.env.LLM_PROVIDER);
+console.log('[STARTUP DEBUG] All OPENAI env vars:', Object.keys(process.env).filter(k => k.includes('OPENAI')));
+
 const express = require('express');
 const cors = require('cors');
 const { createServer } = require('http');
