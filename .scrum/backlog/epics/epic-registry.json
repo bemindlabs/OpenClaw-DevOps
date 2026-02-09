@@ -1,8 +1,8 @@
 {
   "project": "OpenClaw DevOps Platform",
   "version": "1.0",
-  "updated": "2026-02-08",
-  "next_id": 6,
+  "updated": "2026-02-09",
+  "next_id": 7,
   "epics": [
     {
       "id": "EPIC-INFRA",
@@ -73,12 +73,26 @@
       "progress": 0.0,
       "start_date": "2026-03-01",
       "target_date": "2026-04-15"
+    },
+    {
+      "id": "EPIC-DNS",
+      "title": "Domain & DNS Management with Cloudflare",
+      "status": "planning",
+      "priority": "high",
+      "stories": ["US-021", "US-022", "US-023", "US-024", "US-025", "US-026", "US-027"],
+      "completed_stories": 0,
+      "total_stories": 7,
+      "total_points": 25,
+      "completed_points": 0,
+      "progress": 0.0,
+      "start_date": "2026-02-09",
+      "target_date": "2026-03-15"
     }
   ],
   "summary": {
-    "total_epics": 5,
-    "total_stories": 20,
-    "total_points": 107,
+    "total_epics": 6,
+    "total_stories": 27,
+    "total_points": 132,
     "completed_points": 0,
     "overall_progress": 0.0
   }
