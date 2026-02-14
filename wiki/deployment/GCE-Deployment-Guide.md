@@ -43,7 +43,7 @@ Update DNS records to point to instance IP:
 ### Quick Deploy
 
 ```bash
-cd /Users/lps/server/deployments/gce
+cd $(pwd)/deployments/gce
 ./DEPLOY-NOW.sh
 ```
 
@@ -243,14 +243,14 @@ docker-compose restart [service-name]
 
 ### Domain Redirects to Old Domain
 
-**Symptom:** Accessing IP redirects to `agents.ddns.net`
+**Symptom:** Accessing IP redirects to `your-domain.com`
 
 **Cause:** Old domain in nginx default.conf
 
 **Fix:**
 ```bash
 cd /home/info_bemind_tech/openclaw
-sed -i 's/agents.ddns.net/devops-agents.bemind.tech/g' nginx/conf.d/default.conf
+sed -i 's/your-domain.com/devops-agents.bemind.tech/g' nginx/conf.d/default.conf
 docker-compose exec nginx nginx -s reload
 ```
 
@@ -300,7 +300,7 @@ docker-compose up -d --scale landing=2
 
 ```bash
 # Quick redeploy (from local machine)
-cd /Users/lps/server/deployments/gce
+cd $(pwd)/deployments/gce
 ./DEPLOY-NOW.sh
 
 # Manual update on instance
@@ -443,8 +443,8 @@ docker-compose exec redis redis-cli --rdb /data/dump.rdb
 
 For issues or questions:
 - GitHub Issues: https://github.com/bemindlabs/OpenClaw-DevOps/issues
-- Documentation: `/Users/lps/server/DEPLOYMENT.md`
-- Wiki: `/Users/lps/server/wiki/`
+- Documentation: `../DEPLOYMENT.md`
+- Wiki: `$(pwd)/wiki/`
 
 ---
 

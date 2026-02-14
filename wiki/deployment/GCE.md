@@ -42,7 +42,7 @@ gcloud config set project bemind-technology
 ### 1. Setup Docker on Instance
 
 ```bash
-cd /Users/lps/server/deployments/gce
+cd $(pwd)/deployments/gce
 ./quick-setup.sh
 ```
 
@@ -238,8 +238,8 @@ gcloud compute firewall-rules create allow-https \
 Point your domain to the instance external IP:
 
 ```
-A Record: agents.ddns.net → <EXTERNAL_IP>
-A Record: openclaw.agents.ddns.net → <EXTERNAL_IP>
+A Record: your-domain.com → <EXTERNAL_IP>
+A Record: openclaw.your-domain.com → <EXTERNAL_IP>
 ```
 
 ## SSL/TLS Setup
@@ -251,17 +251,17 @@ Using Let's Encrypt:
 ```bash
 # On GCE instance
 sudo apt-get install certbot
-sudo certbot certonly --standalone -d agents.ddns.net -d openclaw.agents.ddns.net
+sudo certbot certonly --standalone -d your-domain.com -d openclaw.your-domain.com
 ```
 
 ### 2. Copy to Project
 
 ```bash
 # Copy certificates
-sudo cp /etc/letsencrypt/live/agents.ddns.net/fullchain.pem \
+sudo cp /etc/letsencrypt/live/your-domain.com/fullchain.pem \
   /home/lps/server/nginx/ssl/cert.pem
 
-sudo cp /etc/letsencrypt/live/agents.ddns.net/privkey.pem \
+sudo cp /etc/letsencrypt/live/your-domain.com/privkey.pem \
   /home/lps/server/nginx/ssl/key.pem
 
 # Fix permissions

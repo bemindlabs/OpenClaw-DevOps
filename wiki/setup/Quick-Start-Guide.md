@@ -19,7 +19,7 @@ Get OpenClaw DevOps up and running in minutes.
 ## 1. Clone Repository
 
 ```bash
-cd /Users/lps/server
+cd $(pwd)
 ```
 
 ## 2. Configure Environment

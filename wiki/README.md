@@ -14,7 +14,7 @@ This wiki contains comprehensive documentation for the OpenClaw DevOps project i
 1. **Open in Obsidian:**
    - Open Obsidian
    - Click "Open folder as vault"
-   - Select `/Users/lps/server/wiki`
+   - Select `$(pwd)/wiki`
 
 2. **Navigation:**
    - Start at [[Home]]
@@ -181,10 +181,10 @@ Keep documentation updated when:
 ## 📚 Related Documentation
 
 Outside wiki:
-- `/Users/lps/server/README.md` - Project overview
-- `/Users/lps/server/CLAUDE.md` - Claude Code guide
-- `/Users/lps/server/DEPLOYMENT.md` - Deployment details
-- `/Users/lps/server/SERVICES.md` - Service reference
+- `../README.md` - Project overview
+- `../CLAUDE.md` - Claude Code guide
+- `../DEPLOYMENT.md` - Deployment details
+- `../SERVICES.md` - Service reference
 
 ---
 

@@ -11,47 +11,84 @@ Complete architectural overview of the OpenClaw DevOps stack.
 
 ## High-Level Architecture
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                       Internet                          │
-└──────────────────────┬──────────────────────────────────┘
-                       │
-                   DNS Resolution
-                       │
-         ┌─────────────┴─────────────┐
-         │                           │
-    agents.ddns.net          openclaw.agents.ddns.net
-         │                           │
-         └─────────────┬─────────────┘
-                       │
-                 ┌─────▼─────┐
-                 │   Nginx   │  Port 80/443
-                 │  (Proxy)  │
-                 └─────┬─────┘
-                       │
-         ┌─────────────┴─────────────┐
-         │                           │
-    ┌────▼────┐               ┌──────▼──────┐
-    │ Landing │ :3000         │   Gateway   │ :18789
-    │  Page   │               │  (OpenClaw) │
-    └────┬────┘               └──────┬──────┘
-         │                           │
-         └─────────────┬─────────────┘
-                       │
-         ┌─────────────┴─────────────────────┐
-         │                                   │
-    ┌────▼────┐  ┌──────────┐  ┌─────────┐ │
-    │ MongoDB │  │PostgreSQL│  │  Redis  │ │
-    └─────────┘  └──────────┘  └─────────┘ │
-         │                                   │
-    ┌────▼────┐  ┌──────────┐  ┌─────────┐ │
-    │  Kafka  │  │    n8n   │  │   ...   │ │
-    └─────────┘  └──────────┘  └─────────┘ │
-                                            │
-                 Monitoring Stack           │
-         ┌───────────────────────┐          │
-         │  Prometheus  Grafana  │◄─────────┘
-         └───────────────────────┘
+```mermaid
+graph TB
+    Internet[Internet Users]
+
+    subgraph "DNS Layer"
+        DNS[DNS Resolution]
+        Internet --> DNS
+
+        DNS --> Domain1[your-domain.com]
+        DNS --> Domain2[openclaw.your-domain.com]
+        DNS --> Domain3[assistant.your-domain.com]
+    end
+
+    subgraph "Edge Layer - Nginx Reverse Proxy"
+        Nginx[Nginx Proxy<br/>Ports 32100/32101]
+
+        Domain1 --> Nginx
+        Domain2 --> Nginx
+        Domain3 --> Nginx
+    end
+
+    subgraph "Application Layer"
+        Landing[Landing Page<br/>Port 32102]
+        Gateway[OpenClaw Gateway<br/>Port 32104]
+        Assistant[Admin Portal<br/>Port 32103]
+
+        Nginx --> Landing
+        Nginx --> Gateway
+        Nginx --> Assistant
+    end
+
+    subgraph "Data Layer"
+        subgraph "Databases"
+            MongoDB[(MongoDB<br/>Port 32120)]
+            PostgreSQL[(PostgreSQL<br/>Port 32121)]
+            Redis[(Redis<br/>Port 32122)]
+        end
+
+        Gateway --> MongoDB
+        Gateway --> PostgreSQL
+        Gateway --> Redis
+        Assistant --> MongoDB
+        Assistant --> PostgreSQL
+    end
+
+    subgraph "Messaging Layer"
+        Kafka[Kafka<br/>Port 32141]
+        Zookeeper[Zookeeper<br/>Port 32140]
+        N8N[n8n Workflows<br/>Port 32142]
+
+        Kafka --> Zookeeper
+        Gateway --> Kafka
+        N8N --> PostgreSQL
+    end
+
+    subgraph "Monitoring Layer"
+        Prometheus[Prometheus<br/>Port 32160]
+        Grafana[Grafana<br/>Port 32161]
+        NodeExporter[Node Exporter<br/>Port 32162]
+        CAdvisor[cAdvisor<br/>Port 32163]
+
+        Prometheus --> NodeExporter
+        Prometheus --> CAdvisor
+        Prometheus --> Gateway
+        Grafana --> Prometheus
+    end
+
+    style Internet fill:#e1f5fe
+    style DNS fill:#f3e5f5
+    style Nginx fill:#fff3e0
+    style Landing fill:#e8f5e8
+    style Gateway fill:#ffeb3b
+    style Assistant fill:#fce4ec
+    style MongoDB fill:#4caf50
+    style PostgreSQL fill:#2196f3
+    style Redis fill:#f44336
+    style Prometheus fill:#ff9800
+    style Grafana fill:#9c27b0
 ```
 
 ## Layer Architecture
@@ -261,7 +298,7 @@ Internet → Nginx (80/443) → Services
 ## Data Flow
 
 ### User Request Flow
-1. User requests `agents.ddns.net`
+1. User requests `your-domain.com`
 2. DNS resolves to server IP
 3. Nginx receives request on port 80/443
 4. Nginx proxies to Landing (port 3000)

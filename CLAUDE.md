@@ -8,18 +8,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Architecture
 
-```
-Internet
-    ↓
-DNS
-    ├─ your-domain.com → Landing Page (Next.js)
-    ├─ openclaw.your-domain.com → Gateway (OpenClaw)
-    └─ assistant.your-domain.com → Admin Portal (Next.js)
-    ↓
-Nginx (Port 80/443)
-    ├─ / → Landing (Port 3000)
-    ├─ openclaw. → Gateway (Port 18789)
-    └─ assistant. → Assistant (Port 5555)
+```mermaid
+graph TB
+    Internet[Internet Users]
+    DNS[DNS Resolution]
+
+    Internet --> DNS
+
+    subgraph "Domain Routing"
+        DNS --> Domain1[your-domain.com]
+        DNS --> Domain2[openclaw.your-domain.com]
+        DNS --> Domain3[assistant.your-domain.com]
+    end
+
+    subgraph "Nginx Reverse Proxy<br/>Ports 32100/32101"
+        Domain1 --> LandingProxy[Landing Proxy]
+        Domain2 --> GatewayProxy[Gateway Proxy]
+        Domain3 --> AssistantProxy[Assistant Proxy]
+    end
+
+    subgraph "Application Services"
+        LandingProxy --> Landing[Landing Page<br/>Port 32102]
+        GatewayProxy --> Gateway[OpenClaw Gateway<br/>Port 32104]
+        AssistantProxy --> Assistant[Admin Portal<br/>Port 32103]
+    end
+
+    style Internet fill:#e1f5fe
+    style DNS fill:#f3e5f5
+    style Landing fill:#e8f5e8
+    style Gateway fill:#fff3e0
+    style Assistant fill:#fce4ec
 ```
 
 ### Monorepo Structure
@@ -38,9 +56,9 @@ This project uses **pnpm workspaces** for monorepo management.
 
 **Basic Stack:**
 
-- **Nginx** (port 80/443): Reverse proxy with rate limiting and WebSocket support
-- **Landing Page** (port 3000): Next.js 16 standalone application
-- **Gateway** (port 18789): OpenClaw AI gateway service
+- **Nginx** (port 32100/32101): Reverse proxy with rate limiting and WebSocket support
+- **Landing Page** (port 32102): Next.js 16 standalone application
+- **Gateway** (port 32104): OpenClaw AI gateway service
 
 **Full Stack (docker-compose.full.yml):**
 
@@ -64,9 +82,9 @@ _Monitoring:_
 
 ### Domain Routing
 
-- `your-domain.com` → Landing Page (Next.js on port 3000)
-- `openclaw.your-domain.com` → Gateway service (port 18789)
-- `assistant.your-domain.com` → Admin Assistant Portal (port 5555)
+- `your-domain.com` → Landing Page (Next.js on port 32102)
+- `openclaw.your-domain.com` → Gateway service (port 32104)
+- `assistant.your-domain.com` → Admin Assistant Portal (port 32103)
 
 ## Project Structure
 
@@ -210,9 +228,9 @@ make onboard
 pnpm install
 
 # Development servers
-pnpm dev:landing      # Start landing dev server (port 3000)
-pnpm dev:assistant    # Start assistant dev server (port 5555)
-pnpm dev:gateway      # Start gateway dev server (port 18789)
+pnpm dev:landing      # Start landing dev server (port 32102)
+pnpm dev:assistant    # Start assistant dev server (port 32103)
+pnpm dev:gateway      # Start gateway dev server (port 32104)
 
 # Build apps
 pnpm build:landing    # Build landing for production
@@ -264,17 +282,17 @@ docker build -t openclaw-assistant:latest .
 # Landing page (with hot reload)
 cd apps/landing
 npm run dev
-# Visit http://localhost:3000
+# Visit http://localhost:32102
 
 # Gateway
 cd apps/gateway
 npm run dev
-# API available at http://localhost:18789
+# API available at http://localhost:32104
 
 # Assistant portal
 cd apps/assistant
 npm run dev
-# Portal at http://localhost:5555
+# Portal at http://localhost:32103
 ```
 
 ## Docker Operations
@@ -307,8 +325,8 @@ docker image prune -a
 ```bash
 # Check service health
 curl http://localhost/health        # Nginx
-curl http://localhost:3000          # Landing
-curl http://localhost:18789         # Gateway
+curl http://localhost:32102          # Landing
+curl http://localhost:32104         # Gateway
 
 # Full stack health checks
 curl http://localhost:9090/-/healthy # Prometheus
@@ -351,9 +369,9 @@ Landing page uses `output: "standalone"` in `next.config.ts`:
 
 ```
 nginx/conf.d/
-├── landing.conf      # agents.ddns.net → landing:3000
-├── openclaw.conf     # openclaw.agents.ddns.net → gateway:18789
-└── assistant.conf    # assistant.agents.ddns.net → assistant:5555
+├── landing.conf      # your-domain.com → landing:32102
+├── openclaw.conf     # openclaw.your-domain.com → gateway:32104
+└── assistant.conf    # assistant.your-domain.com → assistant:32103
 ```
 
 Each config includes:
@@ -534,8 +552,8 @@ curl http://localhost:<port>
 
 ```bash
 # 1. Verify upstream services are running
-curl http://localhost:3000   # Landing
-curl http://localhost:18789  # Gateway
+curl http://localhost:32102   # Landing
+curl http://localhost:32104  # Gateway
 
 # 2. Check nginx configuration
 docker-compose exec nginx nginx -t
@@ -602,6 +620,166 @@ cd deployments/local
 
 See `DEPLOYMENT.md` for comprehensive deployment documentation.
 
+## Open Source Repository Rules
+
+**⚠️ CRITICAL: This is an open-source repository. NO deployment-specific information should EVER be committed.**
+
+### Prohibited Content
+
+**NEVER commit:**
+
+1. **Real IP Addresses**
+   - ❌ Public IPs (e.g., `58.136.234.96`)
+   - ❌ Private IPs (e.g., `192.168.1.152`)
+   - ✅ Use: `YOUR_PUBLIC_IP`, `YOUR_PRIVATE_IP`, `0.0.0.0`, `127.0.0.1`, `localhost`
+
+2. **Real Domain Names**
+   - ❌ Actual domains (e.g., `agents.ddns.net`, `mycompany.com`)
+   - ✅ Use: `your-domain.com`, `example.com`, `localhost`
+
+3. **API Keys & Secrets**
+   - ❌ Any real API keys, tokens, or secrets
+   - ❌ OAuth client IDs/secrets
+   - ❌ Database passwords
+   - ✅ Use: Environment variables with examples in `.env.example`
+   - ✅ Use: Placeholder values like `your_api_key_here`, `changeme`
+
+4. **User-Specific Paths**
+   - ❌ Absolute paths with usernames (e.g., `/Users/lps/server`)
+   - ✅ Use: Relative paths (e.g., `./`, `$(pwd)`)
+   - ✅ Use: Environment variables (e.g., `$HOME`, `${PROJECT_ROOT}`)
+
+5. **Personal Information**
+   - ❌ Real email addresses
+   - ❌ Real names in configs
+   - ❌ Organization-specific details
+   - ✅ Use: `admin@example.com`, `your-email@example.com`
+
+6. **Environment Files**
+   - ❌ `.env` file (contains secrets)
+   - ✅ `.env.example` (template with placeholders)
+   - ✅ Ensure `.env` is in `.gitignore`
+
+### Verification Checklist
+
+Before committing, verify:
+
+```bash
+# Check for sensitive data
+make check-sanitization
+
+# Search for real IPs
+grep -r "58\.136\.234\.96\|192\.168\.1\.152" . --exclude-dir={node_modules,.git}
+
+# Search for real domains
+grep -r "agents\.ddns\.net" . --exclude-dir={node_modules,.git}
+
+# Ensure .env is not tracked
+git status | grep -q "\.env$" && echo "❌ .env is tracked!" || echo "✅ .env not tracked"
+
+# Verify .env is ignored
+git check-ignore .env || echo "❌ .env is NOT in .gitignore!"
+```
+
+### Generic Placeholders to Use
+
+**Domains:**
+- `your-domain.com`
+- `example.com`
+- `localhost`
+- `openclaw.your-domain.com`
+- `assistant.your-domain.com`
+
+**IPs:**
+- `YOUR_PUBLIC_IP`
+- `YOUR_PRIVATE_IP`
+- `0.0.0.0`
+- `127.0.0.1`
+- `localhost`
+
+**Credentials:**
+- `your_password_here`
+- `changeme`
+- `your_api_key_here`
+- `your_secret_here`
+- `admin@example.com`
+
+**Paths:**
+- `$(pwd)` - Current directory
+- `./` - Relative path
+- `${PROJECT_ROOT}` - Project root variable
+- `/path/to/project` - Generic path
+
+### Auto-Sanitization
+
+Use the sanitization script before making the repo public:
+
+```bash
+# Sanitize all deployment references
+make sanitize
+
+# Review changes
+git diff
+
+# Check if sanitized
+make check-sanitization
+```
+
+### Code Review Requirements
+
+All code changes MUST be reviewed for:
+
+1. **No hardcoded values** - All configs use environment variables
+2. **Generic examples** - Documentation uses placeholder values
+3. **No real credentials** - Only examples in `.env.example`
+4. **No absolute paths** - Use relative paths or variables
+5. **Proper .gitignore** - Sensitive files are ignored
+
+### Emergency Cleanup
+
+If sensitive data was accidentally committed:
+
+```bash
+# 1. Remove from working directory
+git rm --cached .env
+
+# 2. Add to .gitignore if not already
+echo ".env" >> .gitignore
+
+# 3. Amend last commit (if just committed)
+git commit --amend
+
+# 4. For older commits, rewrite history
+git filter-branch --force --index-filter \
+  "git rm --cached --ignore-unmatch .env" \
+  --prune-empty --tag-name-filter cat -- --all
+
+# 5. Force push (WARNING: coordinate with team first)
+git push --force --all
+```
+
+**⚠️ IMPORTANT:** If secrets were pushed to remote:
+1. Rotate all exposed credentials immediately
+2. Revoke all exposed API keys
+3. Update all affected services
+4. Document the incident
+
+### CI/CD Integration
+
+Automated checks run on every push:
+
+- ✅ Sanitization verification
+- ✅ Secret scanning (Trivy)
+- ✅ No .env file in commits
+- ✅ No hardcoded IPs or domains
+- ✅ .gitignore compliance
+
+Commits will be **rejected** if they contain:
+- Real IP addresses
+- Real domain names
+- API keys or secrets
+- .env files
+
 ## Important Notes
 
 ### Security
@@ -621,9 +799,11 @@ See `DEPLOYMENT.md` for comprehensive deployment documentation.
 
 Domain names must point to server IP:
 
-- `agents.ddns.net` → Server IP
-- `openclaw.agents.ddns.net` → Server IP
-- `assistant.agents.ddns.net` → Server IP
+- `your-domain.com` → Server IP
+- `openclaw.your-domain.com` → Server IP
+- `assistant.your-domain.com` → Server IP
+
+Replace `your-domain.com` with your actual domain in `.env` configuration.
 
 ### Environment Variables
 
@@ -892,18 +1072,97 @@ Awaiting user guidance before proceeding.
 
 ## Documentation Standards
 
-### docs/ Directory Structure
+### ⚠️ CRITICAL RULE: Documentation Location
 
-The `/Users/lps/server/docs` directory contains technical documentation following these standards:
+**ALL external/user-facing documentation MUST be in the `wiki/` directory.**
+**Internal audit reports and final details go in `docs/` (gitignored).**
+
+**What goes in `wiki/` (PUBLIC - for users):**
+- ✅ User guides, tutorials, how-tos
+- ✅ Setup and installation guides
+- ✅ Architecture and system design
+- ✅ API references
+- ✅ Deployment guides
+- ✅ Troubleshooting and FAQ
+- ✅ Community guidelines
+- ✅ All public-facing documentation
+
+**What goes in `docs/` (INTERNAL - gitignored):**
+- ✅ Internal audit reports
+- ✅ Implementation summaries
+- ✅ Sanitization reports
+- ✅ Final verification documents
+- ✅ Internal technical notes
+
+**Exceptions (allowed in root):**
+- ❌ ONLY these standard files can be in root:
+  - `README.md` - Project overview (required for GitHub)
+  - `CLAUDE.md` - This file (AI assistant guidance)
+  - `CONTRIBUTING.md` - Contribution guidelines (GitHub standard)
+  - `LICENSE` - License file (GitHub standard)
+  - `SECURITY.md` - Security policy (GitHub Security standard)
+  - `.env.example` - Environment template
+  - `package.json`, `pnpm-workspace.yaml` - Package configs
+  - `Makefile` - Build commands
+  - `docker-compose*.yml` - Docker configurations
+
+**Examples:**
+
+```bash
+# ✅ CORRECT - User-facing docs in wiki/
+wiki/setup/Installation-Guide.md
+wiki/guides/Quick-Start.md
+wiki/deployment/GCE-Guide.md
+wiki/Architecture-Overview.md
+
+# ✅ CORRECT - Internal reports in docs/
+docs/AUDIT-REPORT.md
+docs/IMPLEMENTATION-SUMMARY.md
+docs/VERIFICATION-REPORT.md
+
+# ❌ WRONG - Do NOT generate in root
+INSTALLATION-GUIDE.md         # Should be wiki/setup/
+AUDIT-REPORT.md              # Should be docs/
+```
+
+**When creating new documentation:**
+1. **For users:** Use `wiki/category/Document-Name.md`
+2. **For internal:** Use `docs/DOCUMENT-NAME.md` (gitignored)
+3. **Never use root:** Don't create `DOCUMENT-NAME.md` in project root
+4. Update `wiki/Home.md` or `wiki/README.md` with links
+5. Use wikilinks in wiki: `[[Document Name]]`
+6. Use relative links elsewhere: `[Guide](./guide.md)`
+
+### wiki/ Directory Structure
+
+The `wiki/` directory contains ALL user-facing documentation in Obsidian-compatible markdown format:
 
 **Directory Layout:**
 
 ```
+wiki/
+├── Home.md                       # Wiki home page
+├── README.md                     # Wiki index
+├── Architecture-Overview.md      # System architecture
+├── ROADMAP.md                    # Project roadmap
+├── CODE_OF_CONDUCT.md           # Community guidelines
+├── COMMUNITY.md                 # Community information
+├── SECURITY.md                  # Security policy
+├── SUPPORT.md                   # Support information
+├── setup/                       # Setup & installation guides
+├── guides/                      # How-to guides
+├── deployment/                  # Deployment documentation
+├── services/                    # Service documentation
+└── troubleshooting/            # Problem-solving guides
+```
+
+**Internal Documentation (gitignored):**
+
+```
 docs/
-├── README.md                # Documentation index
-├── ARCHITECTURE.md          # System architecture and design
-├── API-REFERENCE.md         # API documentation
-└── backup/                  # Archived documentation versions
+├── AUDIT-REPORT.md             # Internal audits
+├── IMPLEMENTATION-SUMMARY.md   # Implementation notes
+└── VERIFICATION-REPORT.md      # Verification reports
 ```
 
 ### Documentation Rules
