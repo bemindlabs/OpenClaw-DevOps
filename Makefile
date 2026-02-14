@@ -1,7 +1,7 @@
 # OpenClaw DevOps - Makefile
 # Simplified setup, build, and deployment commands
 
-.PHONY: help setup install build start stop restart logs clean test verify docker-clean deep-clean security-setup security-verify security-audit security-test security-docs sanitize check-sanitization dev dev-landing dev-assistant dev-gateway
+.PHONY: help setup install build start stop restart logs clean test verify docker-clean deep-clean security-setup security-verify security-audit security-test security-docs security-install security-scan security-trivy security-semgrep security-docker security-fix sanitize check-sanitization dev dev-landing dev-assistant dev-gateway dev-all dev-attach dev-kill dev-status
 
 # Colors for output
 BLUE := \033[0;34m
@@ -84,25 +84,139 @@ dev: ## Start all apps in development mode (with hot reload)
 	@echo "$(GREEN)Starting all apps in development mode...$(NC)"
 	@echo ""
 	@echo "$(YELLOW)Services:$(NC)"
-	@echo "  Landing:   http://localhost:3000"
-	@echo "  Assistant: http://localhost:5555"
-	@echo "  Gateway:   http://localhost:18789"
+	@echo "  Landing:   http://localhost:32102"
+	@echo "  Assistant: http://localhost:32103"
+	@echo "  Gateway:   http://localhost:32104"
 	@echo ""
 	@echo "$(BLUE)Press Ctrl+C to stop all servers$(NC)"
 	@echo ""
 	@pnpm dev:all
 
 dev-landing: ## Start landing page in dev mode
-	@echo "$(YELLOW)Starting landing page (http://localhost:3000)...$(NC)"
+	@echo "$(YELLOW)Starting landing page (http://localhost:32102)...$(NC)"
 	@pnpm dev:landing
 
 dev-assistant: ## Start assistant portal in dev mode
-	@echo "$(YELLOW)Starting assistant portal (http://localhost:5555)...$(NC)"
+	@echo "$(YELLOW)Starting assistant portal (http://localhost:32103)...$(NC)"
 	@pnpm dev:assistant
 
 dev-gateway: ## Start gateway in dev mode
-	@echo "$(YELLOW)Starting gateway (http://localhost:18789)...$(NC)"
+	@echo "$(YELLOW)Starting gateway (http://localhost:32104)...$(NC)"
 	@pnpm dev:gateway
+
+dev-all: ## Start all apps in tmux session (dev-devops-ai)
+	@echo "$(BLUE)╔════════════════════════════════════════════╗$(NC)"
+	@echo "$(BLUE)║  Starting Development in Tmux             ║$(NC)"
+	@echo "$(BLUE)╚════════════════════════════════════════════╝$(NC)"
+	@echo ""
+	@echo "$(YELLOW)Cleaning development artifacts...$(NC)"
+	@./scripts/dev-clean.sh 2>/dev/null || true
+	@echo ""
+	@# Check if session already exists
+	@if tmux has-session -t dev-devops-ai 2>/dev/null; then \
+		echo "$(YELLOW)⚠  Tmux session 'dev-devops-ai' already exists$(NC)"; \
+		echo ""; \
+		echo "Options:"; \
+		echo "  1. Attach to existing session: tmux attach -t dev-devops-ai"; \
+		echo "  2. Kill existing session: tmux kill-session -t dev-devops-ai && make dev-all"; \
+		echo ""; \
+		exit 1; \
+	fi
+	@echo "$(GREEN)Creating tmux session: dev-devops-ai$(NC)"
+	@echo ""
+	@# Create tmux session with first window for landing
+	@tmux new-session -d -s dev-devops-ai -n landing -c $(PWD)
+	@tmux send-keys -t dev-devops-ai:landing "pnpm dev:landing" Enter
+	@# Create window for assistant
+	@tmux new-window -t dev-devops-ai -n assistant -c $(PWD)
+	@tmux send-keys -t dev-devops-ai:assistant "pnpm dev:assistant" Enter
+	@# Create window for gateway
+	@tmux new-window -t dev-devops-ai -n gateway -c $(PWD)
+	@tmux send-keys -t dev-devops-ai:gateway "pnpm dev:gateway" Enter
+	@# Create coordinator window and select it
+	@tmux new-window -t dev-devops-ai -n coordinator -c $(PWD)
+	@tmux send-keys -t dev-devops-ai:coordinator "clear" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo '$(BLUE)╔═══════════════════════════════════════════════════════╗$(NC)'" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo '$(BLUE)║  OpenClaw DevOps - Development Session               ║$(NC)'" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo '$(BLUE)╚═══════════════════════════════════════════════════════╝$(NC)'" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo ''" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo '$(GREEN)Services running:$(NC)'" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo '  Window 0: landing   - http://localhost:32102'" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo '  Window 1: assistant - http://localhost:32103'" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo '  Window 2: gateway   - http://localhost:32104'" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo '  Window 3: coordinator (current)'" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo ''" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo '$(YELLOW)Tmux controls:$(NC)'" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo '  Ctrl+b 0-3  - Switch to window 0-3'" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo '  Ctrl+b d    - Detach session (services keep running)'" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo '  Ctrl+b [    - Scroll mode (q to exit)'" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo '  Ctrl+b c    - Create new window'" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo '  Ctrl+b x    - Kill current window'" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo ''" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo '$(YELLOW)Useful commands:$(NC)'" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo '  make dev-attach      - Re-attach to this session'" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo '  make dev-kill        - Kill this session'" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo '  make dev-status      - Check running services'" Enter
+	@tmux send-keys -t dev-devops-ai:coordinator "echo ''" Enter
+	@# Select coordinator window
+	@tmux select-window -t dev-devops-ai:coordinator
+	@# Show success message
+	@echo "$(GREEN)✅ Tmux session created!$(NC)"
+	@echo ""
+	@echo "$(YELLOW)Services starting:$(NC)"
+	@echo "  Landing:   http://localhost:3001 (dev) or http://localhost:32102 (prod)"
+	@echo "  Assistant: http://localhost:3002 (dev) or http://localhost:32103 (prod)"
+	@echo "  Gateway:   http://localhost:32104"
+	@echo ""
+	@echo "$(BLUE)📌 To attach to the session:$(NC)"
+	@echo "   tmux attach -t dev-devops-ai"
+	@echo "   (or use: make dev-attach)"
+	@echo ""
+	@echo "$(YELLOW)⌨️  Tmux controls:$(NC)"
+	@echo "   Ctrl+b 0-3  - Switch windows"
+	@echo "   Ctrl+b d    - Detach (keeps services running)"
+	@echo "   Ctrl+b [    - Scroll mode (q to exit)"
+	@echo ""
+	@# Only auto-attach if in interactive terminal
+	@if [ -t 0 ]; then \
+		echo "$(BLUE)Auto-attaching to tmux session...$(NC)"; \
+		sleep 2; \
+		tmux attach -t dev-devops-ai; \
+	else \
+		echo "$(YELLOW)⚠  Non-interactive terminal detected$(NC)"; \
+		echo "$(GREEN)Session running in background. Use 'make dev-attach' to connect.$(NC)"; \
+	fi
+
+dev-attach: ## Attach to existing dev-devops-ai tmux session
+	@if tmux has-session -t dev-devops-ai 2>/dev/null; then \
+		echo "$(GREEN)Attaching to dev-devops-ai session...$(NC)"; \
+		tmux attach -t dev-devops-ai; \
+	else \
+		echo "$(YELLOW)⚠  No dev-devops-ai session found$(NC)"; \
+		echo "Run: make dev-all"; \
+	fi
+
+dev-kill: ## Kill dev-devops-ai tmux session
+	@if tmux has-session -t dev-devops-ai 2>/dev/null; then \
+		echo "$(YELLOW)Killing dev-devops-ai session...$(NC)"; \
+		tmux kill-session -t dev-devops-ai; \
+		echo "$(GREEN)✅ Session killed$(NC)"; \
+	else \
+		echo "$(YELLOW)⚠  No dev-devops-ai session found$(NC)"; \
+	fi
+
+dev-status: ## Check status of dev-devops-ai tmux session
+	@if tmux has-session -t dev-devops-ai 2>/dev/null; then \
+		echo "$(GREEN)✅ dev-devops-ai session is running$(NC)"; \
+		echo ""; \
+		echo "Windows:"; \
+		tmux list-windows -t dev-devops-ai; \
+		echo ""; \
+		echo "To attach: make dev-attach"; \
+	else \
+		echo "$(YELLOW)⚠  No dev-devops-ai session found$(NC)"; \
+		echo "Run: make dev-all"; \
+	fi
 
 ##@ Build
 
@@ -219,9 +333,9 @@ status: ## Show status of all containers
 	@docker-compose ps
 	@echo ""
 	@echo "$(BLUE)Service URLs:$(NC)"
-	@echo "  Landing:   http://localhost:3000"
-	@echo "  Assistant: http://localhost:5555"
-	@echo "  Gateway:   http://localhost:18789"
+	@echo "  Landing:   http://localhost:32102"
+	@echo "  Assistant: http://localhost:32103"
+	@echo "  Gateway:   http://localhost:32104"
 	@echo "  Nginx:     http://localhost"
 
 status-full: ## Show status of full stack
@@ -235,13 +349,13 @@ health: ## Check health of all services
 	@echo "$(BLUE)Checking service health...$(NC)"
 	@echo ""
 	@echo "$(YELLOW)Landing:$(NC)"
-	@curl -f -s http://localhost:3000 > /dev/null && echo "$(GREEN)✓$(NC) Healthy" || echo "$(YELLOW)⚠$(NC)  Not responding"
+	@curl -f -s http://localhost:32102 > /dev/null && echo "$(GREEN)✓$(NC) Healthy" || echo "$(YELLOW)⚠$(NC)  Not responding"
 	@echo ""
 	@echo "$(YELLOW)Gateway:$(NC)"
-	@curl -f -s http://localhost:18789/health > /dev/null && echo "$(GREEN)✓$(NC) Healthy" || echo "$(YELLOW)⚠$(NC)  Not responding"
+	@curl -f -s http://localhost:32104/health > /dev/null && echo "$(GREEN)✓$(NC) Healthy" || echo "$(YELLOW)⚠$(NC)  Not responding"
 	@echo ""
 	@echo "$(YELLOW)Assistant:$(NC)"
-	@curl -f -s http://localhost:5555 > /dev/null && echo "$(GREEN)✓$(NC) Healthy" || echo "$(YELLOW)⚠$(NC)  Not responding"
+	@curl -f -s http://localhost:32103 > /dev/null && echo "$(GREEN)✓$(NC) Healthy" || echo "$(YELLOW)⚠$(NC)  Not responding"
 	@echo ""
 	@echo "$(YELLOW)Nginx:$(NC)"
 	@curl -f -s http://localhost/health > /dev/null && echo "$(GREEN)✓$(NC) Healthy" || echo "$(YELLOW)⚠$(NC)  Not responding"
@@ -341,7 +455,7 @@ security-test: ## Test security configurations (authentication, CORS, etc.)
 	@echo "Run 'make start' first if services are not running"
 	@echo ""
 	@echo "$(YELLOW)[1/3]$(NC) Testing unauthenticated access (should fail)..."
-	@curl -s -X POST http://localhost:18789/api/services/nginx/restart | grep -q "Authentication required" && \
+	@curl -s -X POST http://localhost:32104/api/services/nginx/restart | grep -q "Authentication required" && \
 		echo "$(GREEN)✓$(NC) Unauthenticated access blocked" || \
 		echo "$(RED)✗$(NC) Unauthenticated access NOT blocked"
 	@echo ""
@@ -375,6 +489,37 @@ security-docs: ## Open security documentation
 	else \
 		cat SECURITY.md | head -50; \
 	fi
+
+security-install: ## Install security scanning tools (Trivy + Semgrep)
+	@echo "$(BLUE)Installing security scanning tools...$(NC)"
+	@chmod +x scripts/install-security-tools.sh
+	@./scripts/install-security-tools.sh
+
+security-scan: ## Run all security scans (Trivy + Semgrep)
+	@echo "$(BLUE)Running comprehensive security scans...$(NC)"
+	@chmod +x scripts/security-scan.sh
+	@./scripts/security-scan.sh --all
+
+security-trivy: ## Run Trivy vulnerability scanning
+	@echo "$(BLUE)Running Trivy vulnerability scans...$(NC)"
+	@chmod +x scripts/security-scan.sh
+	@./scripts/security-scan.sh --trivy
+
+security-semgrep: ## Run Semgrep code analysis
+	@echo "$(BLUE)Running Semgrep code analysis...$(NC)"
+	@chmod +x scripts/security-scan.sh
+	@./scripts/security-scan.sh --semgrep
+
+security-docker: ## Run Docker image security scanning
+	@echo "$(BLUE)Running Docker image security scans...$(NC)"
+	@chmod +x scripts/security-scan.sh
+	@./scripts/security-scan.sh --trivy --docker
+
+security-fix: ## Auto-fix security issues (Semgrep)
+	@echo "$(BLUE)Auto-fixing security issues with Semgrep...$(NC)"
+	@echo "$(YELLOW)⚠️  Warning: This will modify files automatically$(NC)"
+	@chmod +x scripts/security-scan.sh
+	@./scripts/security-scan.sh --semgrep --fix
 
 sanitize: ## Sanitize deployment-specific references (domains, IPs, usernames)
 	@echo "$(BLUE)╔════════════════════════════════════════════╗$(NC)"
