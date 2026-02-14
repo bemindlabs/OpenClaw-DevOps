@@ -23,14 +23,14 @@ scrape_configs:
   # Prometheus itself
   - job_name: 'prometheus'
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ['localhost:32160']
         labels:
           service: 'prometheus'
 
   # Node Exporter - System metrics
   - job_name: 'node-exporter'
     static_configs:
-      - targets: ['localhost:9100']
+      - targets: ['localhost:32162']
         labels:
           service: 'node-exporter'
           instance: 'openclaw-devops'
@@ -38,28 +38,28 @@ scrape_configs:
   # cAdvisor - Container metrics
   - job_name: 'cadvisor'
     static_configs:
-      - targets: ['localhost:8080']
+      - targets: ['localhost:3210080']
         labels:
           service: 'cadvisor'
 
   # Redis Exporter
   - job_name: 'redis'
     static_configs:
-      - targets: ['localhost:9121']
+      - targets: ['localhost:32164']
         labels:
           service: 'redis'
 
   # PostgreSQL Exporter
   - job_name: 'postgres'
     static_configs:
-      - targets: ['localhost:9187']
+      - targets: ['localhost:32165']
         labels:
           service: 'postgres'
 
   # MongoDB Exporter
   - job_name: 'mongodb'
     static_configs:
-      - targets: ['localhost:9216']
+      - targets: ['localhost:32166']
         labels:
           service: 'mongodb'
 
@@ -73,7 +73,7 @@ scrape_configs:
   # Application metrics (if your app exposes /metrics endpoint)
   - job_name: 'landing'
     static_configs:
-      - targets: ['localhost:3000']
+      - targets: ['localhost:32102']
         labels:
           service: 'landing'
     metrics_path: '/api/metrics'

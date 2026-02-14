@@ -1,0 +1,387 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "1.0.0",
+  "lastUpdated": "2026-02-14",
+  "description": "Centralized port registry for OpenClaw DevOps platform. All services use ports in the 32100-32199 range.",
+  "portRange": {
+    "start": 32100,
+    "end": 32199,
+    "total": 100
+  },
+  "categories": {
+    "core": {
+      "range": "32100-32119",
+      "description": "Core application services (Nginx, Landing, Assistant, Gateway, Portainer)"
+    },
+    "databases": {
+      "range": "32120-32139",
+      "description": "Database services (MongoDB, PostgreSQL, Redis)"
+    },
+    "messaging": {
+      "range": "32140-32159",
+      "description": "Messaging and workflow services (Zookeeper, Kafka, n8n)"
+    },
+    "monitoring": {
+      "range": "32160-32179",
+      "description": "Monitoring and observability (Prometheus, Grafana, Exporters)"
+    },
+    "optional": {
+      "range": "32180-32189",
+      "description": "Optional AI services (Ollama, LM Studio)"
+    },
+    "reserved": {
+      "range": "32190-32199",
+      "description": "Reserved for future expansion"
+    }
+  },
+  "services": {
+    "nginx-http": {
+      "name": "Nginx HTTP",
+      "category": "core",
+      "port": 32100,
+      "oldPort": 80,
+      "envVar": "NGINX_HTTP_PORT",
+      "protocol": "http",
+      "healthCheck": "http://localhost:32100/health",
+      "description": "Main reverse proxy HTTP endpoint",
+      "configFiles": [
+        "docker-compose.yml",
+        "docker-compose.full.yml",
+        "nginx/nginx.conf"
+      ],
+      "dependencies": [],
+      "externalFacing": true
+    },
+    "nginx-https": {
+      "name": "Nginx HTTPS",
+      "category": "core",
+      "port": 32101,
+      "oldPort": 443,
+      "envVar": "NGINX_HTTPS_PORT",
+      "protocol": "https",
+      "healthCheck": "https://localhost:32101/health",
+      "description": "Main reverse proxy HTTPS endpoint",
+      "configFiles": [
+        "docker-compose.yml",
+        "docker-compose.full.yml",
+        "nginx/nginx.conf"
+      ],
+      "dependencies": [],
+      "externalFacing": true
+    },
+    "landing": {
+      "name": "Landing Page",
+      "category": "core",
+      "port": 32102,
+      "oldPort": 3000,
+      "envVar": "LANDING_PORT",
+      "protocol": "http",
+      "healthCheck": "http://localhost:32102",
+      "description": "Next.js landing page application",
+      "configFiles": [
+        "docker-compose.yml",
+        "docker-compose.full.yml",
+        "nginx/conf.d/landing.conf",
+        "apps/landing/package.json"
+      ],
+      "dependencies": [],
+      "externalFacing": false
+    },
+    "assistant": {
+      "name": "Admin Assistant Portal",
+      "category": "core",
+      "port": 32103,
+      "oldPort": 5555,
+      "envVar": "ASSISTANT_PORT",
+      "protocol": "http",
+      "healthCheck": "http://localhost:32103",
+      "description": "Next.js admin portal application",
+      "configFiles": [
+        "docker-compose.yml",
+        "docker-compose.full.yml",
+        "nginx/conf.d/assistant.conf",
+        "apps/assistant/package.json"
+      ],
+      "dependencies": ["gateway"],
+      "externalFacing": false
+    },
+    "gateway": {
+      "name": "OpenClaw Gateway",
+      "category": "core",
+      "port": 32104,
+      "oldPort": 18789,
+      "envVar": "GATEWAY_PORT",
+      "protocol": "http",
+      "healthCheck": "http://localhost:32104/health",
+      "description": "Express.js API gateway service",
+      "configFiles": [
+        "docker-compose.yml",
+        "docker-compose.full.yml",
+        "nginx/conf.d/openclaw.conf",
+        "apps/gateway/index.js",
+        "apps/gateway/package.json"
+      ],
+      "dependencies": ["mongodb", "redis"],
+      "externalFacing": false
+    },
+    "portainer": {
+      "name": "Portainer",
+      "category": "core",
+      "port": 32105,
+      "oldPort": 9000,
+      "envVar": "PORTAINER_PORT",
+      "protocol": "http",
+      "healthCheck": "http://localhost:32105/api/status",
+      "description": "Docker container management UI",
+      "configFiles": [
+        "docker-compose.yml",
+        "docker-compose.full.yml",
+        "nginx/conf.d/portainer.conf"
+      ],
+      "dependencies": [],
+      "externalFacing": false
+    },
+    "portainer-edge": {
+      "name": "Portainer Edge",
+      "category": "core",
+      "port": 32106,
+      "oldPort": 8000,
+      "envVar": "PORTAINER_EDGE_PORT",
+      "protocol": "http",
+      "healthCheck": null,
+      "description": "Portainer Edge agent tunnel",
+      "configFiles": [
+        "docker-compose.yml",
+        "docker-compose.full.yml"
+      ],
+      "dependencies": ["portainer"],
+      "externalFacing": false
+    },
+    "nginx-proxy-manager": {
+      "name": "Nginx Proxy Manager",
+      "category": "core",
+      "port": 32107,
+      "oldPort": 81,
+      "envVar": "NGINX_PROXY_MANAGER_PORT",
+      "protocol": "http",
+      "healthCheck": "http://localhost:32107",
+      "description": "Web UI for managing nginx reverse proxy and SSL certificates",
+      "configFiles": [
+        "docker-compose.full.yml"
+      ],
+      "dependencies": [],
+      "externalFacing": false
+    },
+    "mongodb": {
+      "name": "MongoDB",
+      "category": "databases",
+      "port": 32120,
+      "oldPort": 27017,
+      "envVar": "MONGODB_PORT",
+      "protocol": "mongodb",
+      "healthCheck": null,
+      "description": "Document database for application data",
+      "configFiles": [
+        "docker-compose.full.yml"
+      ],
+      "dependencies": [],
+      "externalFacing": false
+    },
+    "postgres": {
+      "name": "PostgreSQL",
+      "category": "databases",
+      "port": 32121,
+      "oldPort": 5432,
+      "envVar": "POSTGRES_PORT",
+      "protocol": "postgresql",
+      "healthCheck": null,
+      "description": "Relational database for structured data and n8n",
+      "configFiles": [
+        "docker-compose.full.yml"
+      ],
+      "dependencies": [],
+      "externalFacing": false
+    },
+    "redis": {
+      "name": "Redis",
+      "category": "databases",
+      "port": 32122,
+      "oldPort": 6379,
+      "envVar": "REDIS_PORT",
+      "protocol": "redis",
+      "healthCheck": null,
+      "description": "Cache, session store, and message broker",
+      "configFiles": [
+        "docker-compose.full.yml"
+      ],
+      "dependencies": [],
+      "externalFacing": false
+    },
+    "zookeeper": {
+      "name": "Zookeeper",
+      "category": "messaging",
+      "port": 32140,
+      "oldPort": 2181,
+      "envVar": "ZOOKEEPER_PORT",
+      "protocol": "tcp",
+      "healthCheck": null,
+      "description": "Kafka coordination service",
+      "configFiles": [
+        "docker-compose.full.yml"
+      ],
+      "dependencies": [],
+      "externalFacing": false
+    },
+    "kafka": {
+      "name": "Kafka",
+      "category": "messaging",
+      "port": 32141,
+      "oldPort": 9092,
+      "envVar": "KAFKA_PORT",
+      "protocol": "tcp",
+      "healthCheck": null,
+      "description": "Event streaming platform",
+      "configFiles": [
+        "docker-compose.full.yml"
+      ],
+      "dependencies": ["zookeeper"],
+      "externalFacing": false
+    },
+    "n8n": {
+      "name": "n8n",
+      "category": "messaging",
+      "port": 32142,
+      "oldPort": 5678,
+      "envVar": "N8N_PORT",
+      "protocol": "http",
+      "healthCheck": "http://localhost:32142/healthz",
+      "description": "Workflow automation platform",
+      "configFiles": [
+        "docker-compose.full.yml"
+      ],
+      "dependencies": ["postgres"],
+      "externalFacing": false
+    },
+    "prometheus": {
+      "name": "Prometheus",
+      "category": "monitoring",
+      "port": 32160,
+      "oldPort": 9090,
+      "envVar": "PROMETHEUS_PORT",
+      "protocol": "http",
+      "healthCheck": "http://localhost:32160/-/healthy",
+      "description": "Metrics collection and alerting",
+      "configFiles": [
+        "docker-compose.full.yml",
+        "monitoring/prometheus/prometheus.yml"
+      ],
+      "dependencies": [],
+      "externalFacing": false
+    },
+    "grafana": {
+      "name": "Grafana",
+      "category": "monitoring",
+      "port": 32161,
+      "oldPort": 3001,
+      "envVar": "GRAFANA_PORT",
+      "protocol": "http",
+      "healthCheck": "http://localhost:32161/api/health",
+      "description": "Metrics visualization and dashboards",
+      "configFiles": [
+        "docker-compose.full.yml"
+      ],
+      "dependencies": ["prometheus"],
+      "externalFacing": false
+    },
+    "node-exporter": {
+      "name": "Node Exporter",
+      "category": "monitoring",
+      "port": 32162,
+      "oldPort": 9100,
+      "envVar": "NODE_EXPORTER_PORT",
+      "protocol": "http",
+      "healthCheck": "http://localhost:32162/metrics",
+      "description": "Host system metrics exporter",
+      "configFiles": [
+        "docker-compose.full.yml",
+        "monitoring/prometheus/prometheus.yml"
+      ],
+      "dependencies": [],
+      "externalFacing": false
+    },
+    "cadvisor": {
+      "name": "cAdvisor",
+      "category": "monitoring",
+      "port": 32163,
+      "oldPort": 8080,
+      "envVar": "CADVISOR_PORT",
+      "protocol": "http",
+      "healthCheck": "http://localhost:32163/metrics",
+      "description": "Container metrics exporter",
+      "configFiles": [
+        "docker-compose.full.yml",
+        "monitoring/prometheus/prometheus.yml"
+      ],
+      "dependencies": [],
+      "externalFacing": false
+    },
+    "redis-exporter": {
+      "name": "Redis Exporter",
+      "category": "monitoring",
+      "port": 32164,
+      "oldPort": 9121,
+      "envVar": "REDIS_EXPORTER_PORT",
+      "protocol": "http",
+      "healthCheck": "http://localhost:32164/metrics",
+      "description": "Redis metrics exporter",
+      "configFiles": [
+        "docker-compose.full.yml",
+        "monitoring/prometheus/prometheus.yml"
+      ],
+      "dependencies": ["redis"],
+      "externalFacing": false
+    },
+    "postgres-exporter": {
+      "name": "PostgreSQL Exporter",
+      "category": "monitoring",
+      "port": 32165,
+      "oldPort": 9187,
+      "envVar": "POSTGRES_EXPORTER_PORT",
+      "protocol": "http",
+      "healthCheck": "http://localhost:32165/metrics",
+      "description": "PostgreSQL metrics exporter",
+      "configFiles": [
+        "docker-compose.full.yml",
+        "monitoring/prometheus/prometheus.yml"
+      ],
+      "dependencies": ["postgres"],
+      "externalFacing": false
+    },
+    "mongodb-exporter": {
+      "name": "MongoDB Exporter",
+      "category": "monitoring",
+      "port": 32166,
+      "oldPort": 9216,
+      "envVar": "MONGODB_EXPORTER_PORT",
+      "protocol": "http",
+      "healthCheck": "http://localhost:32166/metrics",
+      "description": "MongoDB metrics exporter",
+      "configFiles": [
+        "docker-compose.full.yml",
+        "monitoring/prometheus/prometheus.yml"
+      ],
+      "dependencies": ["mongodb"],
+      "externalFacing": false
+    }
+  },
+  "portAllocation": {
+    "nextAvailable": {
+      "core": 32108,
+      "databases": 32123,
+      "messaging": 32143,
+      "monitoring": 32167,
+      "optional": 32180,
+      "reserved": 32190
+    }
+  }
+}

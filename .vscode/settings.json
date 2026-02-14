@@ -1,0 +1,128 @@
+{
+  // Editor
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.tabSize": 2,
+  "editor.rulers": [80, 120],
+
+  // Files
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/*.log": true
+  },
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/node_modules/**": true,
+    "**/.next/**": true,
+    "**/dist/**": true
+  },
+
+  // TypeScript/JavaScript
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+
+  // ESLint
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "eslint.workingDirectories": [
+    { "pattern": "./apps/*" }
+  ],
+
+  // Search
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/dist": true,
+    "**/.git": true,
+    "**/package-lock.json": true,
+    "**/pnpm-lock.yaml": true
+  },
+
+  // File Associations
+  "files.associations": {
+    "*.env.example": "properties",
+    "docker-compose*.yml": "yaml",
+    "Dockerfile*": "dockerfile",
+    ".trivyignore": "ignore",
+    ".semgrepignore": "ignore"
+  },
+
+  // Docker
+  "docker.showStartPage": false,
+
+  // Git
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  "git.enableSmartCommit": true,
+
+  // Markdown
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.wordWrap": "on"
+  },
+
+  // YAML
+  "[yaml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // JSON
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // Terminal
+  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.integrated.env.osx": {
+    "COMPOSE_DOCKER_CLI_BUILD": "1",
+    "DOCKER_BUILDKIT": "1"
+  },
+
+  // Monorepo
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "npm.packageManager": "pnpm",
+
+  // Spell Checker
+  "cSpell.words": [
+    "openclaw",
+    "cadvisor",
+    "mongosh",
+    "isready",
+    "psql",
+    "Semgrep",
+    "SARIF",
+    "Kimi",
+    "kimi",
+    "Moonshot",
+    "Anthropic",
+    "OpenAI",
+    "devops",
+    "nextjs",
+    "nestjs",
+    "portainer",
+    "prometheus",
+    "grafana",
+    "zookeeper",
+    "kafka",
+    "trivy",
+    "pnpm",
+    "postgis",
+    "nginx",
+    "webp",
+    "avif"
+  ]
+}

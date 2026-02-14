@@ -24,6 +24,13 @@
     "security:semgrep": "./scripts/security-scan.sh --semgrep",
     "security:docker": "./scripts/security-scan.sh --trivy --docker",
     "security:fix": "./scripts/security-scan.sh --semgrep --fix",
+    "port:validate": "./scripts/validate-ports.sh",
+    "port:list": "cat ./ports.json | jq -r '.services | to_entries[] | \"\\(.value.name): \\(.value.port) (was \\(.value.oldPort))\"' | sort",
+    "port:allocate": "./scripts/allocate-port.sh",
+    "port:update": "node ./scripts/update-ports.js",
+    "port:docs": "node ./scripts/update-ports.js && echo '\nPort documentation updated: PORT_MAP.md'",
+    "check:sensitive": "./scripts/check-sensitive-data.sh",
+    "check:opensource": "./scripts/check-sensitive-data.sh && make check-sanitization",
     "prepare": "husky"
   },
   "devDependencies": {
