@@ -1,6 +1,6 @@
 #!/bin/bash
 # Quick Start for OpenClaw Nginx
-# Subdomain: openclaw.agents.ddns.net
+# Subdomain: openclaw.your-domain.com
 
 set -e
 
@@ -12,7 +12,7 @@ NC='\033[0m'
 
 echo -e "${BLUE}╔════════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║  OpenClaw Nginx - Quick Start             ║${NC}"
-echo -e "${BLUE}║  Subdomain: openclaw.agents.ddns.net      ║${NC}"
+echo -e "${BLUE}║  Subdomain: openclaw.your-domain.com      ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════════╝${NC}"
 echo ""
 
@@ -75,7 +75,7 @@ echo -e "${BLUE}═════════════════════�
 echo -e "${GREEN}✅ Nginx Docker is running!${NC}"
 echo ""
 echo "Next steps:"
-echo "  1. Setup DNS: openclaw.agents.ddns.net → 58.136.234.96"
+echo "  1. Setup DNS: openclaw.your-domain.com → YOUR_PUBLIC_IP"
 echo "  2. Setup port forwarding on router"
 echo "  3. Get Let's Encrypt SSL: ./get-letsencrypt.sh"
 echo ""
@@ -86,5 +86,5 @@ echo "  docker compose restart    # Restart"
 echo ""
 echo "Test URLs:"
 echo "  Local:    https://localhost/health"
-echo "  External: https://openclaw.agents.ddns.net/health"
+echo "  External: https://openclaw.your-domain.com/health"
 echo ""

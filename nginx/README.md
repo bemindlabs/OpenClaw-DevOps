@@ -37,7 +37,7 @@ docker compose down
 
 ## 🔧 Configuration
 
-- **Domain:** agents.ddns.net
+- **Domain:** your-domain.com
 - **Gateway:** 127.0.0.1:18789
 - **Ports:** 80 (HTTP), 443 (HTTPS)
 - **Network Mode:** host (เพื่อเข้าถึง localhost:18789)
@@ -50,10 +50,10 @@ docker compose down
 ## ⚙️ Next Steps
 
 1. **Copy SSL certificates** from router
-2. **Uninstall nginx** on router (58.136.234.96)
+2. **Uninstall nginx** on router (YOUR_PUBLIC_IP)
 3. **Setup port forwarding** on router:
-   - 80 → 192.168.1.152:80
-   - 443 → 192.168.1.152:443
+   - 80 → YOUR_PRIVATE_IP:80
+   - 443 → YOUR_PRIVATE_IP:443
 
 See workspace documentation for detailed instructions.
 

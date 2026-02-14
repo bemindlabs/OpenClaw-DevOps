@@ -1,5 +1,5 @@
 #!/bin/bash
-# Get Let's Encrypt SSL Certificate for openclaw.agents.ddns.net
+# Get Let's Encrypt SSL Certificate for openclaw.your-domain.com
 
 set -e
 
@@ -9,7 +9,7 @@ RED='\033[0;31m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-DOMAIN="openclaw.agents.ddns.net"
+DOMAIN="openclaw.your-domain.com"
 EMAIL="${1:-admin@your-domain.com}"
 
 echo -e "${BLUE}╔════════════════════════════════════════════╗${NC}"
@@ -36,7 +36,7 @@ if [ -z "$DNS_IP" ]; then
     echo "Please setup DNS first:"
     echo "  Type: A Record"
     echo "  Name: openclaw"
-    echo "  Value: 58.136.234.96"
+    echo "  Value: YOUR_PUBLIC_IP"
     exit 1
 fi
 echo -e "${GREEN}✓${NC} DNS: $DOMAIN → $DNS_IP"

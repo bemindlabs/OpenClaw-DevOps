@@ -1,8 +1,8 @@
-# DNS Setup for openclaw.agents.ddns.net
+# DNS Setup for openclaw.your-domain.com
 
 ## 🎯 Overview
 
-ตั้งค่า subdomain `openclaw.agents.ddns.net` ให้ชี้มาที่เครื่อง Mac (192.168.1.152)
+ตั้งค่า subdomain `openclaw.your-domain.com` ให้ชี้มาที่เครื่อง Mac (YOUR_PRIVATE_IP)
 
 ## 📋 DNS Configuration
 
@@ -18,9 +18,9 @@
    ```
    Type:     A Record
    Name:     openclaw
-   Domain:   agents.ddns.net
-   Full:     openclaw.agents.ddns.net
-   Value:    58.136.234.96 (Public IP)
+   Domain:   your-domain.com
+   Full:     openclaw.your-domain.com
+   Value:    YOUR_PUBLIC_IP (Public IP)
    TTL:      300 (5 minutes)
    ```
 
@@ -32,12 +32,12 @@
 
 #### No-IP Example:
 ```bash
-curl "http://username:password@dynupdate.no-ip.com/nic/update?hostname=openclaw.agents.ddns.net&myip=58.136.234.96"
+curl "http://username:password@dynupdate.no-ip.com/nic/update?hostname=openclaw.your-domain.com&myip=YOUR_PUBLIC_IP"
 ```
 
 #### Duck DNS Example:
 ```bash
-curl "https://www.duckdns.org/update?domains=openclaw.agents&token=YOUR_TOKEN&ip=58.136.234.96"
+curl "https://www.duckdns.org/update?domains=openclaw.your-domain&token=YOUR_TOKEN&ip=YOUR_PUBLIC_IP"
 ```
 
 ## ✅ Verify DNS Setup
@@ -45,30 +45,30 @@ curl "https://www.duckdns.org/update?domains=openclaw.agents&token=YOUR_TOKEN&ip
 ### 1. ตรวจสอบ DNS Record
 ```bash
 # ใช้ nslookup
-nslookup openclaw.agents.ddns.net
+nslookup openclaw.your-domain.com
 
 # ควรได้:
-# Name:   openclaw.agents.ddns.net
-# Address: 58.136.234.96
+# Name:   openclaw.your-domain.com
+# Address: YOUR_PUBLIC_IP
 ```
 
 ```bash
 # ใช้ dig
-dig openclaw.agents.ddns.net +short
+dig openclaw.your-domain.com +short
 
-# ควรได้: 58.136.234.96
+# ควรได้: YOUR_PUBLIC_IP
 ```
 
 ### 2. ทดสอบการเชื่อมต่อ
 ```bash
 # Test ping
-ping openclaw.agents.ddns.net
+ping openclaw.your-domain.com
 
 # Test HTTP (ก่อน setup nginx)
-curl -I http://openclaw.agents.ddns.net
+curl -I http://openclaw.your-domain.com
 
 # Test HTTPS (หลัง setup nginx + SSL)
-curl -I https://openclaw.agents.ddns.net
+curl -I https://openclaw.your-domain.com
 ```
 
 ## 🔐 SSL Certificate Setup
@@ -85,13 +85,13 @@ sudo apt install certbot  # Ubuntu/Debian
 
 # ขอ certificate สำหรับ subdomain
 sudo certbot certonly --standalone \
-  -d openclaw.agents.ddns.net \
+  -d openclaw.your-domain.com \
   --preferred-challenges http
 
 # คัดลอก certificate
-sudo cp /etc/letsencrypt/live/openclaw.agents.ddns.net/fullchain.pem \
+sudo cp /etc/letsencrypt/live/openclaw.your-domain.com/fullchain.pem \
   /Users/lps/server/nginx/ssl/cert.pem
-sudo cp /etc/letsencrypt/live/openclaw.agents.ddns.net/privkey.pem \
+sudo cp /etc/letsencrypt/live/openclaw.your-domain.com/privkey.pem \
   /Users/lps/server/nginx/ssl/key.pem
 sudo chown $USER:$USER /Users/lps/server/nginx/ssl/*.pem
 chmod 600 /Users/lps/server/nginx/ssl/key.pem
@@ -100,13 +100,13 @@ chmod 644 /Users/lps/server/nginx/ssl/cert.pem
 
 ### Method 2: Copy from Router (ถ้ามี wildcard cert)
 
-ถ้า router มี wildcard certificate สำหรับ `*.agents.ddns.net`:
+ถ้า router มี wildcard certificate สำหรับ `*.your-domain.com`:
 
 ```bash
 # คัดลอกจาก router
-scp root@58.136.234.96:/etc/letsencrypt/live/agents.ddns.net/fullchain.pem \
+scp root@YOUR_PUBLIC_IP:/etc/letsencrypt/live/your-domain.com/fullchain.pem \
   /Users/lps/server/nginx/ssl/cert.pem
-scp root@58.136.234.96:/etc/letsencrypt/live/agents.ddns.net/privkey.pem \
+scp root@YOUR_PUBLIC_IP:/etc/letsencrypt/live/your-domain.com/privkey.pem \
   /Users/lps/server/nginx/ssl/key.pem
 
 chmod 600 /Users/lps/server/nginx/ssl/key.pem
@@ -121,7 +121,7 @@ cd /Users/lps/server/nginx
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -keyout ssl/key.pem \
   -out ssl/cert.pem \
-  -subj "/C=TH/ST=Bangkok/L=Bangkok/O=OpenClaw/CN=openclaw.agents.ddns.net"
+  -subj "/C=TH/ST=Bangkok/L=Bangkok/O=OpenClaw/CN=openclaw.your-domain.com"
 
 chmod 600 ssl/key.pem
 chmod 644 ssl/cert.pem
@@ -129,14 +129,14 @@ chmod 644 ssl/cert.pem
 
 ## 🔀 Router Port Forwarding
 
-ตั้งค่า router (58.136.234.96) ให้ forward traffic มาที่เครื่อง Mac:
+ตั้งค่า router (YOUR_PUBLIC_IP) ให้ forward traffic มาที่เครื่อง Mac:
 
 ### Port Forwarding Rules:
 
 | Service | Protocol | External Port | Internal IP | Internal Port |
 |---------|----------|---------------|-------------|---------------|
-| HTTP    | TCP      | 80            | 192.168.1.152 | 80          |
-| HTTPS   | TCP      | 443           | 192.168.1.152 | 443         |
+| HTTP    | TCP      | 80            | YOUR_PRIVATE_IP | 80          |
+| HTTPS   | TCP      | 443           | YOUR_PRIVATE_IP | 443         |
 
 ### วิธีตั้งค่า:
 
@@ -149,8 +149,8 @@ chmod 644 ssl/cert.pem
 
 ```bash
 # 1. ตรวจสอบ DNS
-nslookup openclaw.agents.ddns.net
-# Expected: 58.136.234.96
+nslookup openclaw.your-domain.com
+# Expected: YOUR_PUBLIC_IP
 
 # 2. ตรวจสอบ OpenClaw Gateway
 curl http://127.0.0.1:18789
@@ -169,7 +169,7 @@ curl -I -k https://localhost/health
 # Expected: 200 OK
 
 # 6. ทดสอบ subdomain (external)
-curl -I https://openclaw.agents.ddns.net/health
+curl -I https://openclaw.your-domain.com/health
 # Expected: 200 OK, "healthy"
 ```
 
@@ -178,13 +178,13 @@ curl -I https://openclaw.agents.ddns.net/health
 ```
 Internet
     ↓
-DNS: openclaw.agents.ddns.net → 58.136.234.96
+DNS: openclaw.your-domain.com → YOUR_PUBLIC_IP
     ↓
-Router (58.136.234.96)
-    ├─ Port 80  → 192.168.1.152:80
-    └─ Port 443 → 192.168.1.152:443
+Router (YOUR_PUBLIC_IP)
+    ├─ Port 80  → YOUR_PRIVATE_IP:80
+    └─ Port 443 → YOUR_PRIVATE_IP:443
          ↓
-    Mac (192.168.1.152)
+    Mac (YOUR_PRIVATE_IP)
          ├─ Nginx Docker (80, 443)
          │   └─ proxy_pass → 127.0.0.1:18789
          └─ OpenClaw Gateway ✅ (18789)
@@ -199,7 +199,7 @@ sudo dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 
 # ใช้ Google DNS ทดสอบ
-nslookup openclaw.agents.ddns.net 8.8.8.8
+nslookup openclaw.your-domain.com 8.8.8.8
 ```
 
 ### SSL Certificate Error
@@ -210,16 +210,16 @@ openssl x509 -in /Users/lps/server/nginx/ssl/cert.pem -text -noout
 # ตรวจสอบ Common Name
 openssl x509 -in /Users/lps/server/nginx/ssl/cert.pem -noout -subject
 
-# ควรเห็น: CN=openclaw.agents.ddns.net
+# ควรเห็น: CN=openclaw.your-domain.com
 ```
 
 ### Port Forwarding ไม่ทำงาน
 ```bash
 # SSH เข้า router
-ssh root@58.136.234.96
+ssh root@YOUR_PUBLIC_IP
 
 # ตรวจสอบ NAT rules (OpenWrt)
-iptables -t nat -L -n -v | grep 192.168.1.152
+iptables -t nat -L -n -v | grep YOUR_PRIVATE_IP
 
 # ตรวจสอบ port
 netstat -an | grep LISTEN | grep -E ':80|:443'
@@ -227,13 +227,13 @@ netstat -an | grep LISTEN | grep -E ':80|:443'
 
 ## 📝 Summary
 
-- [x] ตั้งค่า DNS record: `openclaw.agents.ddns.net → 58.136.234.96`
+- [x] ตั้งค่า DNS record: `openclaw.your-domain.com → YOUR_PUBLIC_IP`
 - [x] ขอ SSL certificate สำหรับ subdomain
-- [x] ตั้งค่า nginx ใช้ `server_name openclaw.agents.ddns.net`
+- [x] ตั้งค่า nginx ใช้ `server_name openclaw.your-domain.com`
 - [x] Setup port forwarding บน router
 - [x] ทดสอบการเชื่อมต่อ
 
 ---
 *Created: 2026-02-01*
-*Subdomain: openclaw.agents.ddns.net*
+*Subdomain: openclaw.your-domain.com*
 *Gateway: 127.0.0.1:18789*

@@ -135,4 +135,5 @@ zookeeper-data/
 local-config.yml
 
 # internal docs
+# Internal documentation and reports (use wiki/ for external docs)
 docs/

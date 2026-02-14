@@ -28,14 +28,14 @@ const app = express();
 const httpServer = createServer(app);
 
 // Configuration
-const PORT = process.env.PORT || 18789;
+const PORT = process.env.PORT || 32104;
 const HOST = process.env.HOSTNAME || '0.0.0.0';
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // Parse CORS origins from environment variable
 const CORS_ORIGINS = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
-  : (NODE_ENV === 'development' ? ['http://localhost:3000', 'http://localhost:5555'] : []);
+  : (NODE_ENV === 'development' ? ['http://localhost:32102', 'http://localhost:32103'] : []);
 
 // Initialize Socket.IO
 const io = new Server(httpServer, {

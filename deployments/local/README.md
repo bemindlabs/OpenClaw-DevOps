@@ -220,8 +220,8 @@ curl http://localhost
 curl http://localhost/health
 
 # Test with actual domain (update /etc/hosts first)
-echo "127.0.0.1 agents.ddns.net" | sudo tee -a /etc/hosts
-curl http://agents.ddns.net
+echo "127.0.0.1 your-domain.com" | sudo tee -a /etc/hosts
+curl http://your-domain.com
 ```
 
 ## 🚨 Troubleshooting
