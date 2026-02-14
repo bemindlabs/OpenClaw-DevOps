@@ -5,13 +5,15 @@ version: '3.8'
 
 services:
   # Nginx Reverse Proxy
+  # ONLY PUBLIC SERVICE - All other services are internal
   nginx:
     image: nginx:alpine
     container_name: openclaw-nginx
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      # ONLY external ports exposed
+      - "${NGINX_HTTP_PORT:-32100}:80"
+      - "${NGINX_HTTPS_PORT:-32101}:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
@@ -27,70 +29,82 @@ services:
       - landing
       - gateway
       - portainer
+    networks:
+      - openclaw-internal
 
   # Landing Page (Next.js)
+  # INTERNAL ONLY - accessed via Nginx reverse proxy
   landing:
     image: openclaw-landing:latest
     container_name: openclaw-landing
     restart: unless-stopped
-    ports:
-      - "${LANDING_PORT:-3000}:3000"
+    # No external ports - only accessible via nginx
+    expose:
+      - "32102"
     env_file:
       - .env
     environment:
       - NODE_ENV=${NODE_ENV:-production}
-      - PORT=3000
+      - PORT=32102
       - HOSTNAME=0.0.0.0
       - NEXT_PUBLIC_LANDING_DOMAIN=${LANDING_DOMAIN:-your-domain.com}
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:3000"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:32102"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+    networks:
+      - openclaw-internal
 
   # OpenClaw Gateway
+  # INTERNAL ONLY - accessed via Nginx reverse proxy
   gateway:
     image: openclaw-gateway:latest
     container_name: openclaw-gateway
     restart: unless-stopped
-    ports:
-      - "${GATEWAY_PORT:-18789}:18789"
+    # No external ports - only accessible via nginx
+    expose:
+      - "32104"
     env_file:
       - .env
     environment:
       - NODE_ENV=${NODE_ENV:-production}
-      - PORT=18789
+      - PORT=32104
       - HOSTNAME=0.0.0.0
       - MONGODB_URI=${MONGODB_URI}
       - REDIS_HOST=${REDIS_HOST:-redis}
-      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PORT=${REDIS_PORT:-32122}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - .:/app/project:ro
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:18789/health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:32104/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+    networks:
+      - openclaw-internal
 
   # Assistant Portal (Next.js)
+  # INTERNAL ONLY - accessed via Nginx reverse proxy
   assistant:
     image: openclaw-assistant:latest
     container_name: openclaw-assistant
     restart: unless-stopped
-    ports:
-      - "${ASSISTANT_PORT:-5555}:5555"
+    # No external ports - only accessible via nginx
+    expose:
+      - "32103"
     env_file:
       - .env
     environment:
       - NODE_ENV=${NODE_ENV:-production}
-      - PORT=5555
+      - PORT=32103
       - HOSTNAME=0.0.0.0
-      - GATEWAY_URL=http://gateway:18789
-      - NEXT_PUBLIC_GATEWAY_URL=${NEXT_PUBLIC_GATEWAY_URL:-http://gateway:18789}
+      - GATEWAY_URL=http://gateway:32104
+      - NEXT_PUBLIC_GATEWAY_URL=${NEXT_PUBLIC_GATEWAY_URL:-http://gateway:32104}
       - NEXTAUTH_URL=${NEXTAUTH_URL}
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
@@ -99,22 +113,26 @@ services:
       - REDIS_HOST=${REDIS_HOST:-redis}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:5555"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:32103"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
     depends_on:
       - gateway
+    networks:
+      - openclaw-internal
 
   # Portainer - Docker Management UI
+  # INTERNAL ONLY - accessed via Nginx reverse proxy
   portainer:
     image: portainer/portainer-ce:latest
     container_name: openclaw-portainer
     restart: unless-stopped
-    ports:
-      - "${PORTAINER_PORT:-9000}:9000"
-      - "${PORTAINER_EDGE_PORT:-8000}:8000"
+    # No external ports - only accessible via nginx
+    expose:
+      - "9000"
+      - "8000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - portainer-data:/data
@@ -126,7 +144,16 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    networks:
+      - openclaw-internal
 
 volumes:
   nginx-logs:
   portainer-data:
+
+# Internal network - services communicate without exposing ports to host
+networks:
+  openclaw-internal:
+    driver: bridge
+    name: openclaw-internal
+    internal: false  # Allow outbound internet for services that need it

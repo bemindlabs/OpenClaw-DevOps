@@ -2,6 +2,17 @@ version: '3.8'
 
 # OpenClaw DevOps - Full Stack with Databases, Messaging, and Monitoring
 # This extends the basic docker-compose.yml with additional services
+#
+# SECURITY NOTE: This file uses network_mode: 'host' for Linux production deployments.
+# All services are accessible on localhost but external access is controlled by firewall.
+#
+# FIREWALL RULES (allow ONLY these ports externally):
+#   - 32100 (HTTP via Nginx)
+#   - 32101 (HTTPS via Nginx)
+#   - 22 (SSH - for administration)
+#
+# All other ports should be blocked by firewall to ensure container privacy.
+# See wiki/Security-Agents.md for detailed firewall configuration.
 
 services:
   # =============================================================================
@@ -16,18 +27,18 @@ services:
     network_mode: 'host'
     environment:
       - NODE_ENV=${NODE_ENV:-production}
-      - PORT=${ASSISTANT_PORT:-5555}
+      - PORT=${ASSISTANT_PORT:-32103}
       - HOSTNAME=0.0.0.0
-      - MONGODB_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@localhost:${MONGODB_PORT:-27017}/${MONGO_DATABASE}
-      - REDIS_URL=redis://:${REDIS_PASSWORD}@localhost:${REDIS_PORT:-6379}
-      - GATEWAY_URL=http://localhost:${GATEWAY_PORT:-18789}
+      - MONGODB_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@localhost:${MONGODB_PORT:-32120}/${MONGO_DATABASE}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@localhost:${REDIS_PORT:-32122}
+      - GATEWAY_URL=http://localhost:${GATEWAY_PORT:-32104}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - NEXTAUTH_URL=${NEXTAUTH_URL:-https://assistant.your-domain.com}
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
       - ALLOWED_OAUTH_DOMAINS=${ALLOWED_OAUTH_DOMAINS}
     healthcheck:
-      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://127.0.0.1:5555/']
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://127.0.0.1:32103/']
       interval: 30s
       timeout: 30s
       retries: 3
@@ -68,14 +79,14 @@ services:
     network_mode: 'host'
     environment:
       - NODE_ENV=${NODE_ENV:-production}
-      - PORT=${LANDING_PORT:-3000}
+      - PORT=${LANDING_PORT:-32102}
       - HOSTNAME=0.0.0.0
-      - MONGODB_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@localhost:${MONGODB_PORT:-27017}/${MONGO_DATABASE}
-      - POSTGRES_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT:-5432}/${POSTGRES_DB}
-      - REDIS_URL=redis://:${REDIS_PASSWORD}@localhost:${REDIS_PORT:-6379}
-      - GATEWAY_URL=http://localhost:${GATEWAY_PORT:-18789}
+      - MONGODB_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@localhost:${MONGODB_PORT:-32120}/${MONGO_DATABASE}
+      - POSTGRES_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT:-32121}/${POSTGRES_DB}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@localhost:${REDIS_PORT:-32122}
+      - GATEWAY_URL=http://localhost:${GATEWAY_PORT:-32104}
     healthcheck:
-      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://127.0.0.1:3000/']
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://127.0.0.1:32102/']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -96,13 +107,13 @@ services:
     network_mode: 'host'
     environment:
       - NODE_ENV=${NODE_ENV:-production}
-      - PORT=${GATEWAY_PORT:-18789}
+      - PORT=${GATEWAY_PORT:-32104}
       - HOSTNAME=0.0.0.0
-      - MONGODB_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@localhost:${MONGODB_PORT:-27017}/${MONGO_DATABASE}
-      - POSTGRES_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT:-5432}/${POSTGRES_DB}
-      - REDIS_URL=redis://:${REDIS_PASSWORD}@localhost:${REDIS_PORT:-6379}
-      - KAFKA_BROKERS=localhost:${KAFKA_PORT:-9092}
-      - N8N_WEBHOOK_URL=http://localhost:${N8N_PORT:-5678}
+      - MONGODB_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@localhost:${MONGODB_PORT:-32120}/${MONGO_DATABASE}
+      - POSTGRES_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT:-32121}/${POSTGRES_DB}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@localhost:${REDIS_PORT:-32122}
+      - KAFKA_BROKERS=localhost:${KAFKA_PORT:-32141}
+      - N8N_WEBHOOK_URL=http://localhost:${N8N_PORT:-32142}
       # LLM Configuration
       - LLM_PROVIDER=${LLM_PROVIDER}
       - LLM_FALLBACK_PROVIDERS=${LLM_FALLBACK_PROVIDERS}
@@ -130,6 +141,30 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+
+  # Nginx Proxy Manager - Web UI for managing reverse proxy and SSL
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: openclaw-nginx-proxy-manager
+    restart: unless-stopped
+    network_mode: 'host'
+    environment:
+      - TZ=${TZ:-UTC}
+      # Database connection (uses MariaDB internally)
+      - DB_MYSQL_HOST=localhost
+      - DB_MYSQL_PORT=3306
+      - DB_MYSQL_USER=${NPM_DB_USER:-npm}
+      - DB_MYSQL_PASSWORD=${NPM_DB_PASSWORD:-changeme}
+      - DB_MYSQL_NAME=${NPM_DB_NAME:-npm}
+    volumes:
+      - nginx-proxy-manager-data:/data
+      - nginx-proxy-manager-letsencrypt:/etc/letsencrypt
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:32107']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   # =============================================================================
   # DATABASES
@@ -209,7 +244,7 @@ services:
     restart: unless-stopped
     network_mode: 'host'
     environment:
-      - ZOOKEEPER_CLIENT_PORT=${ZOOKEEPER_PORT:-2181}
+      - ZOOKEEPER_CLIENT_PORT=${ZOOKEEPER_PORT:-32140}
       - ZOOKEEPER_TICK_TIME=2000
       - ZOOKEEPER_SYNC_LIMIT=2
       - TZ=${TZ:-Asia/Bangkok}
@@ -231,8 +266,8 @@ services:
     network_mode: 'host'
     environment:
       - KAFKA_BROKER_ID=${KAFKA_BROKER_ID:-1}
-      - KAFKA_ZOOKEEPER_CONNECT=localhost:${ZOOKEEPER_PORT:-2181}
-      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:${KAFKA_PORT:-9092}
+      - KAFKA_ZOOKEEPER_CONNECT=localhost:${ZOOKEEPER_PORT:-32140}
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:${KAFKA_PORT:-32141}
       - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT
       - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
@@ -263,16 +298,16 @@ services:
       - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER}
       - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD}
       - N8N_HOST=localhost
-      - N8N_PORT=${N8N_PORT:-5678}
+      - N8N_PORT=${N8N_PORT:-32142}
       - N8N_PROTOCOL=http
-      - WEBHOOK_URL=http://localhost:${N8N_PORT:-5678}/
+      - WEBHOOK_URL=http://localhost:${N8N_PORT:-32142}/
       - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
       - EXECUTIONS_DATA_SAVE_ON_SUCCESS=all
       - EXECUTIONS_DATA_SAVE_ON_ERROR=all
       - EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS=true
       - DB_TYPE=postgresdb
       - DB_POSTGRESDB_HOST=localhost
-      - DB_POSTGRESDB_PORT=${POSTGRES_PORT:-5432}
+      - DB_POSTGRESDB_PORT=${POSTGRES_PORT:-32121}
       - DB_POSTGRESDB_DATABASE=n8n
       - DB_POSTGRESDB_USER=${POSTGRES_USER}
       - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
@@ -283,7 +318,7 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:5678/healthz']
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:32142/healthz']
       interval: 30s
       timeout: 10s
       retries: 5
@@ -313,7 +348,7 @@ services:
       - ./monitoring/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
       - prometheus-data:/prometheus
     healthcheck:
-      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:9090/-/healthy']
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:32160/-/healthy']
       interval: 30s
       timeout: 10s
       retries: 5
@@ -329,7 +364,7 @@ services:
       - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
       - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
       - GF_INSTALL_PLUGINS=${GF_INSTALL_PLUGINS}
-      - GF_SERVER_HTTP_PORT=${GRAFANA_PORT:-3001}
+      - GF_SERVER_HTTP_PORT=${GRAFANA_PORT:-32161}
       - GF_AUTH_ANONYMOUS_ENABLED=false
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_SECURITY_ALLOW_EMBEDDING=true
@@ -342,7 +377,7 @@ services:
       prometheus:
         condition: service_healthy
     healthcheck:
-      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:3001/api/health']
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:32161/api/health']
       interval: 30s
       timeout: 10s
       retries: 5
@@ -394,7 +429,7 @@ services:
     restart: unless-stopped
     network_mode: 'host'
     environment:
-      - REDIS_ADDR=localhost:${REDIS_PORT:-6379}
+      - REDIS_ADDR=localhost:${REDIS_PORT:-32122}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - TZ=${TZ:-Asia/Bangkok}
     depends_on:
@@ -408,7 +443,7 @@ services:
     restart: unless-stopped
     network_mode: 'host'
     environment:
-      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT:-5432}/${POSTGRES_DB}?sslmode=disable
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT:-32121}/${POSTGRES_DB}?sslmode=disable
       - TZ=${TZ:-Asia/Bangkok}
     depends_on:
       postgres:
@@ -421,7 +456,7 @@ services:
     restart: unless-stopped
     network_mode: 'host'
     environment:
-      - MONGODB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@localhost:${MONGODB_PORT:-27017}
+      - MONGODB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@localhost:${MONGODB_PORT:-32120}
       - TZ=${TZ:-Asia/Bangkok}
     depends_on:
       mongodb:
@@ -462,6 +497,12 @@ volumes:
   prometheus-data:
     driver: local
   grafana-data:
+    driver: local
+
+  # Nginx Proxy Manager volumes
+  nginx-proxy-manager-data:
+    driver: local
+  nginx-proxy-manager-letsencrypt:
     driver: local
 
 # =============================================================================
