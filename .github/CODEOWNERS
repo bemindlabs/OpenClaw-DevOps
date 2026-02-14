@@ -1,0 +1,47 @@
+# Code Owners for OpenClaw DevOps
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global owners - will be requested for review on all PRs unless overridden
+* @openclaw/core-team
+
+# Infrastructure and DevOps
+/docker-compose*.yml @openclaw/devops-team
+/nginx/ @openclaw/devops-team
+/deployments/ @openclaw/devops-team
+/monitoring/ @openclaw/devops-team
+/scripts/ @openclaw/devops-team
+Makefile @openclaw/devops-team
+
+# Frontend Applications
+/apps/landing/ @openclaw/frontend-team
+/apps/assistant/ @openclaw/frontend-team
+
+# Backend Services
+/apps/gateway/ @openclaw/backend-team
+/apps/openclaw-gateway/ @openclaw/backend-team
+
+# Documentation
+/wiki/ @openclaw/docs-team
+/docs/ @openclaw/docs-team
+*.md @openclaw/docs-team
+
+# Security
+SECURITY.md @openclaw/security-team
+/scripts/security-*.sh @openclaw/security-team
+trivy*.yaml @openclaw/security-team
+.semgrep*.yml @openclaw/security-team
+
+# Configuration
+.env.example @openclaw/core-team
+package.json @openclaw/core-team
+pnpm-workspace.yaml @openclaw/core-team
+
+# CI/CD
+/.github/ @openclaw/devops-team
+/.husky/ @openclaw/devops-team
+
+# Port Management System
+ports.json @openclaw/devops-team
+/scripts/validate-ports.sh @openclaw/devops-team
+/scripts/update-ports.js @openclaw/devops-team
+/scripts/allocate-port.sh @openclaw/devops-team

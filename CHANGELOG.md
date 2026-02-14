@@ -1,133 +1,109 @@
 # Changelog
 
-All notable changes to the OpenClaw DevOps project will be documented in this file.
+All notable changes to the OpenClaw DevOps platform will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-## [0.0.1] - 2026-02-08
-
 ### Added
-
-- Security scanning integration with Trivy and Semgrep
-- GitHub Actions workflow for automated security scans
-- Security scanning scripts (`scripts/security-scan.sh`, `scripts/install-security-tools.sh`)
-- Makefile with convenient targets for development and security
-- Comprehensive security documentation (`SECURITY-SCANNING.md`, `SECURITY-QUICKSTART.md`)
-- AGENTS.md documenting security scanning agents
-- Product backlog with 19 identified issues and improvements
-- Pre-commit/pre-push hooks with optional security scanning
+- Container privacy implementation - only Nginx exposes ports externally
+- Centralized port management system (32100-32199 range)
+- Automated port migration scripts (validate-ports.sh, update-ports.js, allocate-port.sh)
+- Comprehensive validation and testing reports
+- CODE_OF_CONDUCT.md in root directory for GitHub standards
+- .vscode workspace configurations
+- .github/CODEOWNERS file
 
 ### Changed
+- Migrated all services from scattered ports to 32100-32199 range
+- Updated docker-compose.yml to use internal network with bridge driver
+- All services except Nginx now use `expose:` instead of `ports:`
+- Updated nginx upstream configurations for new port scheme
 
-- Updated README.md with security scanning section
-- Updated SECURITY.md with continuous monitoring section
-- Updated CLAUDE.md with security scanning workflow
-- Updated .gitignore to exclude security reports
-- Enhanced .husky hooks with security scanning options
-- Reorganized documentation structure
+### Security
+- Implemented container isolation - only Nginx accessible externally
+- Added openclaw-internal Docker network for service communication
+- Enhanced security documentation with firewall requirements
+
+## [0.0.1] - 2026-02-09
+
+### Added
+- Automated Portainer deployment script
+- Portainer domain configuration to GCE deployment
+- Portainer to base Docker Compose stack
+- Portainer setup and usage guide
+- Cloudflare DNS setup automation
+- Sprint 01 planning artifacts and story files
+- Product backlog registry with user stories US-001 to US-020
+- Epic files for OpenClaw DevOps features
+- Comprehensive GCE deployment guide in wiki
+- Tech stack badges to README
+- AI/LLM features documentation
+- Security scanning with Trivy and Semgrep
+- GitHub Actions workflows (Claude Code Review, PR Assistant)
+- Monitoring stories (US-018, US-019, US-020)
+
+### Changed
+- Updated GCE configuration with domain settings
+- Updated README with AI/LLM features and comprehensive documentation
+- Updated landing page startup command display
+- Updated pnpm lockfile for LLM dependencies
 
 ### Fixed
+- ESLint config for Next.js 16 compatibility
+- PR check failures with enhanced security hooks
+- CI/CD pipeline issues
 
-- Documented authentication bypass vulnerability (pending fix)
-- Documented API key exposure in logs (pending fix)
-- Documented NextAuth configuration mismatch (pending fix)
-- Identified 47 code quality and security issues in codebase scan
+### Removed
+- Obsolete configuration summary files
 
-### Security
-
-- Added Trivy for vulnerability scanning (dependencies, Docker images, secrets)
-- Added Semgrep for static code analysis (OWASP Top 10, code patterns)
-- Configured SARIF output for GitHub Security integration
-- Implemented secret detection rules for API keys and credentials
-
----
-
-## [0.0.1-beta] - 2026-02-07
+## [0.0.0] - 2026-02-07
 
 ### Added
-
-- Multi-provider LLM support (OpenAI, Anthropic, Google AI, Moonshot)
-- AI-powered Assistant Portal with chat interface
-- Google OAuth authentication for admin portal
-- Real-time service monitoring dashboard
-- Docker Compose configurations for basic and full stack
-- Nginx reverse proxy with rate limiting
-- Prometheus and Grafana monitoring integration
-- cAdvisor container metrics
-- Landing page with Next.js 16 and React 19
-- Gateway service with Express.js
-- MongoDB, PostgreSQL, and Redis database support
-- Kafka and Zookeeper messaging infrastructure
-- n8n workflow automation integration
-- GCE deployment scripts
-- Interactive onboarding wizard (`make onboarding`)
-
-### Changed
-
-- Migrated to pnpm workspace monorepo structure
-- Updated to Next.js 16 standalone build
-- Implemented unified green & black design system
-- Enhanced configuration documentation
-
-### Security
-
-- Added Bearer token authentication for Docker management API
-- Implemented command injection prevention using spawn
-- Added OAuth domain whitelist configuration
-- Hardened CORS policy configuration
-- Documented security best practices
-
----
-
-## [0.1.0] - 2026-01-15
-
-### Added
-
 - Initial project structure
-- Basic Docker Compose setup
-- Landing page skeleton
-- Gateway API foundation
-- Database container configurations
+- Next.js landing page application
+- Next.js assistant portal application
+- Express.js API gateway
+- Nginx reverse proxy configuration
+- Docker Compose setup (basic and full stack)
+- MongoDB, PostgreSQL, Redis database services
+- Kafka and Zookeeper messaging services
+- n8n workflow automation
+- Prometheus and Grafana monitoring stack
+- Monitoring exporters (Node, cAdvisor, Redis, PostgreSQL, MongoDB)
+- pnpm workspace monorepo structure
+- Environment configuration system
+- Security scanning setup
+- Basic documentation (README, SECURITY, CONTRIBUTING)
+- Wiki structure with guides and documentation
+
+### Infrastructure
+- GCE deployment scripts
+- Local development setup
+- Makefile with common commands
+- Git hooks for pre-commit and pre-push validation
+- CI/CD workflows
 
 ---
 
-## Release Notes
+## Version History
 
-### Versioning Strategy
-
-- **Major (X.0.0)**: Breaking changes, major architecture updates
-- **Minor (0.X.0)**: New features, backward-compatible additions
-- **Patch (0.0.X)**: Bug fixes, security patches, documentation updates
-
-### Branch Strategy
-
-- `main`: Stable releases
-- `develop`: Active development
-- `feature/*`: Feature branches
-- `hotfix/*`: Critical fixes
-
-### Migration Guides
-
-Migration guides for breaking changes will be documented in the `docs/migrations/` directory when applicable.
+- **[Unreleased]** - Container privacy & port migration
+- **[0.0.1]** - 2026-02-09 - Portainer, DNS automation, sprint planning
+- **[0.0.0]** - 2026-02-07 - Initial release with core infrastructure
 
 ---
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on submitting changes.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
 
-When adding changelog entries:
+## Security
 
-1. Add entries under `[Unreleased]` section
-2. Use categories: Added, Changed, Deprecated, Removed, Fixed, Security
-3. Reference issue/PR numbers where applicable
-4. Keep descriptions concise but informative
+See [SECURITY.md](SECURITY.md) for security policies and vulnerability reporting.
 
 ---
 
-**Project:** OpenClaw DevOps
-**Repository:** https://github.com/bemindlabs/OpenClaw-DevOps
-**Last Updated:** 2026-02-08
+**Last Updated:** 2026-02-14
