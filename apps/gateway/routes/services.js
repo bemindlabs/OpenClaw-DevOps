@@ -173,4 +173,123 @@ router.get('/health', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/services/:name/up
+ * Create and start a service (requires authentication)
+ */
+router.post('/:name/up', requireAuth, validateService, async (req, res) => {
+  try {
+    const result = await dockerManager.upService(req.params.name);
+    res.json({
+      success: true,
+      message: `Service ${req.params.name} is up`,
+      ...result,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error(`Error bringing up ${req.params.name}:`, error);
+    res.status(500).json({
+      success: false,
+      error: error.message || error.error,
+      output: error.stderr
+    });
+  }
+});
+
+/**
+ * POST /api/services/:name/down
+ * Stop and remove a service (requires authentication)
+ */
+router.post('/:name/down', requireAuth, validateService, async (req, res) => {
+  try {
+    const result = await dockerManager.downService(req.params.name);
+    res.json({
+      success: true,
+      message: `Service ${req.params.name} is down`,
+      ...result,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error(`Error bringing down ${req.params.name}:`, error);
+    res.status(500).json({
+      success: false,
+      error: error.message || error.error,
+      output: error.stderr
+    });
+  }
+});
+
+/**
+ * GET /api/services/:name/logs
+ * Get logs for a service
+ */
+router.get('/:name/logs', validateService, async (req, res) => {
+  try {
+    // Parse query parameters
+    const options = {
+      tail: parseInt(req.query.tail, 10) || 100,
+      timestamps: req.query.timestamps !== 'false',
+      since: parseInt(req.query.since, 10) || 0
+    };
+
+    const result = await dockerManager.getLogs(req.params.name, options);
+    res.json({
+      ...result,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error(`Error getting logs for ${req.params.name}:`, error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * DELETE /api/services/:name/remove
+ * Remove a service (requires authentication)
+ */
+router.delete('/:name/remove', requireAuth, validateService, async (req, res) => {
+  try {
+    // Parse options from request body
+    const options = {
+      volumes: req.body?.volumes === true,
+      force: req.body?.force === true
+    };
+
+    const result = await dockerManager.removeService(req.params.name, options);
+    res.json({
+      ...result,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error(`Error removing ${req.params.name}:`, error);
+    res.status(500).json({
+      success: false,
+      error: error.message || error.error
+    });
+  }
+});
+
+/**
+ * POST /api/services/:name/pull
+ * Pull latest image for a service (requires authentication)
+ */
+router.post('/:name/pull', requireAuth, validateService, async (req, res) => {
+  try {
+    const result = await dockerManager.pullImage(req.params.name);
+    res.json({
+      ...result,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error(`Error pulling image for ${req.params.name}:`, error);
+    res.status(500).json({
+      success: false,
+      error: error.message || error.error
+    });
+  }
+});
+
 module.exports = router;
