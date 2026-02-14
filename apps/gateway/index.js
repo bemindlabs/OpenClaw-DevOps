@@ -75,7 +75,7 @@ app.get('/health', (req, res) => {
   res.json({
     status: 'healthy',
     service: 'openclaw-devops-gateway',
-    version: '1.0.0',
+    version: '1.1.0',
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
     features: {
@@ -103,7 +103,7 @@ app.get('/api/status', (req, res) => {
 app.get('/', (req, res) => {
   res.json({
     name: 'OpenClaw DevOps Gateway',
-    version: '1.0.0',
+    version: '1.1.0',
     description: 'AI Agent Platform Gateway with Docker Service Management',
     endpoints: {
       health: 'GET /health',
@@ -114,7 +114,12 @@ app.get('/', (req, res) => {
         serviceStatus: 'GET /api/services/:name/status',
         start: 'POST /api/services/:name/start',
         stop: 'POST /api/services/:name/stop',
-        restart: 'POST /api/services/:name/restart'
+        restart: 'POST /api/services/:name/restart',
+        up: 'POST /api/services/:name/up',
+        down: 'POST /api/services/:name/down',
+        logs: 'GET /api/services/:name/logs',
+        pull: 'POST /api/services/:name/pull',
+        remove: 'DELETE /api/services/:name/remove'
       },
       chat: {
         message: 'POST /api/chat/message',
@@ -161,7 +166,7 @@ app.use((err, req, res, next) => {
 httpServer.listen(PORT, HOST, () => {
   console.log('');
   console.log('╔═══════════════════════════════════════════════════════════╗');
-  console.log('║           OpenClaw DevOps Gateway v1.0.0                  ║');
+  console.log('║           OpenClaw DevOps Gateway v1.1.0                  ║');
   console.log('╠═══════════════════════════════════════════════════════════╣');
   console.log(`║  HTTP:      http://${HOST}:${PORT}                       ║`);
   console.log(`║  WebSocket: ws://${HOST}:${PORT}                         ║`);

@@ -1,15 +1,16 @@
 'use client'
 
-import { Service } from '@/types/service'
+import { Service, ServiceActionType } from '@/types/service'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { HealthBadge, StatusDot } from './health-badge'
+import { ServiceActions } from './service-actions'
 import { Play, Square, RotateCcw, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface ServiceCardProps {
   service: Service
-  onAction: (action: 'start' | 'stop' | 'restart') => void
+  onAction: (action: ServiceActionType) => void
   actionLoading?: boolean
   userRole?: 'admin' | 'operator' | 'viewer'
 }
@@ -46,7 +47,18 @@ export function ServiceCard({
             <StatusDot health={service.health} status={service.status} />
             <CardTitle className="text-lg">{service.displayName}</CardTitle>
           </div>
-          <HealthBadge health={service.health} status={service.status} />
+          <div className="flex items-center gap-2">
+            <HealthBadge health={service.health} status={service.status} />
+            {canControl && (
+              <ServiceActions
+                serviceName={service.name}
+                serviceDisplayName={service.displayName}
+                isRunning={isRunning}
+                onAction={onAction}
+                actionLoading={actionLoading}
+              />
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent>

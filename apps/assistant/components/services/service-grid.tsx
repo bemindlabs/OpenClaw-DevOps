@@ -1,9 +1,11 @@
 'use client'
 
 import { useServices, SERVICE_CATEGORIES } from '@/hooks/use-services'
+import { useToast } from '@/hooks/use-toast'
 import { ServiceCard } from './service-card'
 import { Button } from '@/components/ui/button'
 import { RefreshCw, Loader2 } from 'lucide-react'
+import { ServiceActionType } from '@/types/service'
 
 interface ServiceGridProps {
   userRole?: 'admin' | 'operator' | 'viewer'
@@ -12,6 +14,7 @@ interface ServiceGridProps {
 export function ServiceGrid({ userRole = 'admin' }: ServiceGridProps) {
   const { services, loading, error, refreshServices, executeAction, actionLoading } =
     useServices()
+  const { toast } = useToast()
 
   const categoryLabels = {
     core: 'Core Services',
@@ -27,14 +30,47 @@ export function ServiceGrid({ userRole = 'admin' }: ServiceGridProps) {
     monitoring: 'Metrics collection and visualization',
   }
 
+  const getActionLabel = (action: ServiceActionType): string => {
+    switch (action) {
+      case 'start':
+        return 'started'
+      case 'stop':
+        return 'stopped'
+      case 'restart':
+        return 'restarted'
+      case 'up':
+        return 'created and started'
+      case 'down':
+        return 'stopped and removed'
+      case 'pull':
+        return 'image pulled'
+      case 'remove':
+        return 'removed'
+      default:
+        return action
+    }
+  }
+
   const handleAction = async (
     serviceName: string,
-    action: 'start' | 'stop' | 'restart'
+    action: ServiceActionType
   ) => {
     const result = await executeAction(serviceName, action)
-    if (!result.success) {
-      // TODO: Show toast notification
-      console.error(result.message)
+    const service = services[serviceName]
+    const displayName = service?.displayName || serviceName
+
+    if (result.success) {
+      toast({
+        title: 'Success',
+        description: `${displayName} ${getActionLabel(action)} successfully.`,
+        variant: 'success',
+      })
+    } else {
+      toast({
+        title: 'Error',
+        description: result.message || `Failed to ${action} ${displayName}.`,
+        variant: 'destructive',
+      })
     }
   }
 

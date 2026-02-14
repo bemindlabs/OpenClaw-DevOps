@@ -13,9 +13,11 @@ export interface Service {
   lastStarted?: string
 }
 
+export type ServiceActionType = 'start' | 'stop' | 'restart' | 'up' | 'down' | 'pull' | 'remove' | 'logs'
+
 export interface ServiceAction {
   service: string
-  action: 'start' | 'stop' | 'restart' | 'logs'
+  action: ServiceActionType
 }
 
 export interface ServiceStatusResponse {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Service, ServiceStatus, ServiceHealth } from '@/types/service'
+import { Service, ServiceStatus, ServiceHealth, ServiceActionType } from '@/types/service'
 import { SERVICES, SERVICE_CATEGORIES } from '@/lib/constants'
 import apiClient from '@/lib/api-client'
 
@@ -10,7 +10,7 @@ interface UseServicesReturn {
   loading: boolean
   error: string | null
   refreshServices: () => Promise<void>
-  executeAction: (serviceName: string, action: 'start' | 'stop' | 'restart') => Promise<{
+  executeAction: (serviceName: string, action: ServiceActionType) => Promise<{
     success: boolean
     message: string
   }>
@@ -76,7 +76,7 @@ export function useServices(): UseServicesReturn {
   const executeAction = useCallback(
     async (
       serviceName: string,
-      action: 'start' | 'stop' | 'restart'
+      action: ServiceActionType
     ): Promise<{ success: boolean; message: string }> => {
       setActionLoading((prev) => ({ ...prev, [serviceName]: true }))
 
@@ -93,6 +93,23 @@ export function useServices(): UseServicesReturn {
           case 'restart':
             response = await apiClient.restartService(serviceName)
             break
+          case 'up':
+            response = await apiClient.upService(serviceName)
+            break
+          case 'down':
+            response = await apiClient.downService(serviceName)
+            break
+          case 'pull':
+            response = await apiClient.pullService(serviceName)
+            break
+          case 'remove':
+            response = await apiClient.removeService(serviceName)
+            break
+          default:
+            return {
+              success: false,
+              message: `Unknown action: ${action}`,
+            }
         }
 
         if (response.success) {

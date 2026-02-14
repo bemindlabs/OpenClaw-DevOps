@@ -33,17 +33,13 @@ const ACTION_PATTERNS = {
     /^start\s+(\w+)/i,
     /^run\s+(\w+)/i,
     /^boot\s+(\w+)/i,
-    /^launch\s+(\w+)/i,
-    /^up\s+(\w+)/i,
-    /^bring\s+up\s+(\w+)/i
+    /^launch\s+(\w+)/i
   ],
   stop: [
     /^stop\s+(\w+)/i,
     /^halt\s+(\w+)/i,
     /^kill\s+(\w+)/i,
-    /^down\s+(\w+)/i,
-    /^shutdown\s+(\w+)/i,
-    /^bring\s+down\s+(\w+)/i
+    /^shutdown\s+(\w+)/i
   ],
   restart: [
     /^restart\s+(\w+)/i,
@@ -65,6 +61,28 @@ const ACTION_PATTERNS = {
     /^tail\s+(\w+)/i,
     /^view\s+logs?\s+(?:for\s+)?(\w+)/i,
     /^get\s+logs?\s+(?:for\s+)?(\w+)/i
+  ],
+  up: [
+    /^up\s+(\w+)/i,
+    /^bring\s+up\s+(\w+)/i,
+    /^create\s+(\w+)/i,
+    /^deploy\s+(\w+)/i
+  ],
+  down: [
+    /^down\s+(\w+)/i,
+    /^bring\s+down\s+(\w+)/i,
+    /^destroy\s+(\w+)/i,
+    /^teardown\s+(\w+)/i
+  ],
+  pull: [
+    /^pull\s+(\w+)/i,
+    /^update\s+image\s+(\w+)/i,
+    /^fetch\s+(\w+)/i
+  ],
+  remove: [
+    /^remove\s+(\w+)/i,
+    /^rm\s+(\w+)/i,
+    /^delete\s+(\w+)/i
   ],
   help: [
     /^help$/i,
@@ -213,6 +231,10 @@ Available Commands:
   - restart <service> Restart a service
   - status [service]  Check service status (all if no service specified)
   - logs <service>    View service logs
+  - up <service>      Create and start a service (e.g., "up nginx", "bring up mongodb", "deploy landing")
+  - down <service>    Stop and remove a service (e.g., "down nginx", "destroy postgres", "teardown landing")
+  - pull <service>    Pull latest image for a service (e.g., "pull nginx", "update image landing", "fetch gateway")
+  - remove <service>  Remove a stopped service (e.g., "remove nginx", "rm mongodb", "delete postgres")
 
 Available Services:
   Core: nginx, landing, gateway, assistant
@@ -225,6 +247,12 @@ Examples:
   "status mongodb"
   "show logs for landing"
   "is redis running?"
+  "up nginx"
+  "bring up mongodb"
+  "deploy landing"
+  "down postgres"
+  "pull gateway"
+  "remove redis"
 `.trim();
   }
 

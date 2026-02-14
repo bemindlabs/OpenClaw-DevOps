@@ -78,6 +78,34 @@ export const apiClient = {
     })
   },
 
+  // Create and start a service (docker-compose up)
+  async upService(service: string) {
+    return fetchApi<{ message: string; output: string }>(`/api/services/${service}/up`, {
+      method: 'POST',
+    })
+  },
+
+  // Stop and remove a service (docker-compose down)
+  async downService(service: string) {
+    return fetchApi<{ message: string; output: string }>(`/api/services/${service}/down`, {
+      method: 'POST',
+    })
+  },
+
+  // Pull latest image for a service
+  async pullService(service: string) {
+    return fetchApi<{ message: string; output: string }>(`/api/services/${service}/pull`, {
+      method: 'POST',
+    })
+  },
+
+  // Remove a service container
+  async removeService(service: string) {
+    return fetchApi<{ message: string; output: string }>(`/api/services/${service}/remove`, {
+      method: 'DELETE',
+    })
+  },
+
   // Send chat message (for Telegram bridge or direct chat)
   async sendChatMessage(message: string, sessionId?: string, mode: 'command' | 'assistant' = 'command') {
     return fetchApi<{
